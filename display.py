@@ -3,9 +3,9 @@ import neopixel
 from board import NEOPIXEL
 
 DISPLAY_TIME_SECS = 60 * 5
-OFF_COLOR       =   0,   0,   0
-NEED_HEAT_COLOR =   0,   0, 255
-TOO_HOT_COLOR   = 255,   0,   0
+OFF_COLOR       =    0,   0,   0
+NEED_HEAT_COLOR = (  0,   0, 255), (  0, 255, 255)
+TOO_HOT_COLOR   = (255,   0,   0), (255,  64,   0)
 
 
 class Display:
@@ -15,15 +15,22 @@ class Display:
         self.display_on = False
 
     def show_temp_difference(self, current_temp, desired_temp, temp_change_increment):
-        increase = round((desired_temp - current_temp) / temp_change_increment)
+        temp_diff = desired_temp - current_temp
+        incremental_increase = round(temp_diff / temp_change_increment)
+        if abs(incremental_increase) > 10:
+            increase = round(temp_diff)
+            color_index = 1
+        else:
+            increase = incremental_increase
+            color_index = 0
         self.display_on = True
         self.turn_off_display_time = monotonic() + DISPLAY_TIME_SECS
         self.turn_pixels_off(show=False)
         for i in range(min(10, abs(increase))):
             if increase > 0:
-                self.pixels[i] = NEED_HEAT_COLOR    # Counterclockwise
+                self.pixels[i] = NEED_HEAT_COLOR[color_index]    # Counterclockwise
             else:
-                self.pixels[9 - i] = TOO_HOT_COLOR  # Clockwise
+                self.pixels[9 - i] = TOO_HOT_COLOR[color_index]  # Clockwise
         self.pixels.show()
 
     def turn_pixels_off(self, show=True):
