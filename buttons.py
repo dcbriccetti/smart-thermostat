@@ -2,7 +2,7 @@ from time import monotonic, sleep
 from board import BUTTON_A, BUTTON_B, A5, A6
 from digitalio import DigitalInOut, Pull
 
-BUTTON_REPEAT_DELAY_SECS = 0.2
+BUTTON_REPEAT_DELAY_SECS = 0.3
 
 
 class Buttons:
