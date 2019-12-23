@@ -1,8 +1,7 @@
 from time import monotonic, sleep
 
 TEMP_CHECK_INTERVAL_SECS = 30
-HEAT_ON_PSEUDO_TEMP = 23.5
-HEAT_OFF_PSEUDO_TEMP = 23.0
+HEAT_PSEUDO_TEMP = 25
 
 
 class TempMgr:
@@ -47,7 +46,8 @@ class TempMgr:
 
     def _log_state(self, desired_temp=None, heat_state=None):
         desired_temp_str = '' if desired_temp is None else '{:.1f}'.format(desired_temp)
-        heat_state = '' if heat_state is None else HEAT_ON_PSEUDO_TEMP if heat_state else HEAT_OFF_PSEUDO_TEMP
+        heat_state = '\t' if heat_state is None else \
+            '%.1f\t' % HEAT_PSEUDO_TEMP if heat_state else '\t%.1f' % HEAT_PSEUDO_TEMP
         line = '{:.2f}\t{:.1f}\t{}\t{}\n'.format(monotonic(), self.current_temp, desired_temp_str, heat_state)
         print(line.strip())
         try:
