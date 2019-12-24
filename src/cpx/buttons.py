@@ -2,11 +2,10 @@ from time import monotonic, sleep
 from board import BUTTON_A, BUTTON_B, A5, A6
 from digitalio import DigitalInOut, Pull
 
-BUTTON_REPEAT_DELAY_SECS = 0.3
-
 
 class Buttons:
-    def __init__(self):
+    def __init__(self, button_repeat_delay_secs):
+        self.button_repeat_delay_secs = button_repeat_delay_secs
         self.next_button_check = monotonic()
         self.buttons = [DigitalInOut(pin) for pin in (BUTTON_A, BUTTON_B)]
         for button in self.buttons:
@@ -21,7 +20,7 @@ class Buttons:
         if time_now >= self.next_button_check:
             for index, button in enumerate(self.buttons):
                 if button.value:
-                    self.next_button_check = time_now + BUTTON_REPEAT_DELAY_SECS
+                    self.next_button_check = time_now + self.button_repeat_delay_secs
                     self._notify_listeners(index)
 
     def _notify_listeners(self, index):
