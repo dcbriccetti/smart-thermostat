@@ -1,5 +1,5 @@
 from cpx.sensor import Sensor
-from cpx.knob import Knob
+from cpx.timingknob import TimingKnob
 from cpx.heaterrelay import HeaterRelay
 from cpx.buttons import Buttons
 from cpx.display import Display
@@ -22,7 +22,7 @@ def button_push_listener(button_index):
 buttons = Buttons(BUTTON_REPEAT_DELAY_SECS)
 buttons.add_push_listener(button_push_listener)
 display = Display()
-temp_mgr = TempMgr(Sensor(), Knob(), HeaterRelay(), display, DEFAULT_DESIRED_TEMP)
+temp_mgr = TempMgr(Sensor(), TimingKnob(), HeaterRelay(), display, DEFAULT_DESIRED_TEMP)
 temp_mgr.add_state_change_listener(state_change_listener)
 
 while True:
