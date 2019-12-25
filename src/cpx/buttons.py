@@ -4,6 +4,8 @@ from digitalio import DigitalInOut, Pull
 
 
 class Buttons:
+    'A general-purpose button press detection class. Calls the listeners with a 0 or a 1 when a button is pushed.'
+
     def __init__(self, button_repeat_delay_secs):
         self.button_repeat_delay_secs = button_repeat_delay_secs
         self.next_button_check = monotonic()

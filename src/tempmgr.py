@@ -45,12 +45,7 @@ class TempMgr:
         heater_state_changing = heater_should_be_on != self.heater_is_on
 
         if heater_state_changing:
-            if heater_should_be_on:
-                self.heater_is_on = True
-                self.shutoff = AnticipatoryShutoff(self.knob, degrees_of_heat_needed)
-            else:
-                self.heater_is_on = False
-            self.heater.enable(on=heater_should_be_on)
+            self._change_heater_state(heater_should_be_on, degrees_of_heat_needed)
 
         if self.current_temp != self.previous_temp or heater_state_changing or self.desired_temp_changed:
             self.previous_temp = self.current_temp
@@ -59,6 +54,15 @@ class TempMgr:
             log_state(HEAT_PSEUDO_TEMP, self.current_temp, desired_temp=dt, heat_state=hs)
             self.desired_temp_changed = False
             self._notify_listeners()
+
+    def _change_heater_state(self, heater_should_be_on, degrees_of_heat_needed):
+        if heater_should_be_on:
+            self.heater_is_on = True
+            self.shutoff = AnticipatoryShutoff(self.knob, degrees_of_heat_needed)
+        else:
+            self.heater_is_on = False
+
+        self.heater.enable(on=heater_should_be_on)
 
     def _notify_listeners(self):
         for l in self.state_change_listeners:

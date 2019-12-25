@@ -9,6 +9,8 @@ TOO_HOT_COLOR   = (255,   0,   0), (255,  64,   0)
 
 
 class Display:
+    'Displays the difference between the measured and desired temperatures on LEDs'
+
     def __init__(self):
         self.pixels = neopixel.NeoPixel(NEOPIXEL, 10, brightness=0.1, auto_write=False)
         self.turn_off_display_time = monotonic()
@@ -25,7 +27,7 @@ class Display:
             color_index = 0
         self.display_on = True
         self.turn_off_display_time = monotonic() + DISPLAY_TIME_SECS
-        self.turn_pixels_off(show=False)
+        self._turn_pixels_off(show=False)
         for i in range(min(10, abs(increase))):
             if increase > 0:
                 self.pixels[i] = NEED_HEAT_COLOR[color_index]    # Counterclockwise
@@ -33,14 +35,15 @@ class Display:
                 self.pixels[9 - i] = TOO_HOT_COLOR[color_index]  # Clockwise
         self.pixels.show()
 
-    def turn_pixels_off(self, show=True):
+    def update(self):
+        'Turn off display at the appropriate time'
+        time_now = monotonic()
+        if self.display_on and time_now > self.turn_off_display_time:
+            self.display_on = False
+            self._turn_pixels_off()
+
+    def _turn_pixels_off(self, show=True):
         for i in range(10):
             self.pixels[i] = OFF_COLOR
         if show:
             self.pixels.show()
-
-    def update(self):
-        time_now = monotonic()
-        if self.display_on and time_now > self.turn_off_display_time:
-            self.display_on = False
-            self.turn_pixels_off()

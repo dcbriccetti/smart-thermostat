@@ -3,6 +3,8 @@ from digitalio import DigitalInOut, Pull
 
 
 class HeaterRelay:
+    'Controls the relay connected to the heater'
+
     def __init__(self, pin=A5):
         self.heater = DigitalInOut(pin)
         self.heater.switch_to_output()
