@@ -1,5 +1,5 @@
-from time import monotonic, sleep
-from board import BUTTON_A, BUTTON_B, A5, A6
+from time import monotonic
+from board import BUTTON_A, BUTTON_B
 from digitalio import DigitalInOut, Pull
 
 
@@ -14,8 +14,8 @@ class Buttons:
             button.switch_to_input(pull=Pull.DOWN)
         self.listeners = []
 
-    def add_push_listener(self, l):
-        self.listeners.append(l)
+    def on_change(self, listener):
+        self.listeners.append(listener)
 
     def update(self):
         time_now = monotonic()
@@ -23,8 +23,5 @@ class Buttons:
             for index, button in enumerate(self.buttons):
                 if button.value:
                     self.next_button_check = time_now + self.button_repeat_delay_secs
-                    self._notify_listeners(index)
-
-    def _notify_listeners(self, index):
-        for listener in self.listeners:
-            listener(index)
+                    for listener in self.listeners:
+                        listener(index)

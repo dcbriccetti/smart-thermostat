@@ -6,7 +6,7 @@ TEMP_CHECK_INTERVAL_SECS = 15
 HEAT_PSEUDO_TEMP = 23
 
 
-class TempMgr:
+class ThermoController:
     def __init__(self, temp_sensor, knob, heater, display, desired_temp):
         self.temp_sensor = temp_sensor
         self.knob = knob
@@ -22,13 +22,10 @@ class TempMgr:
         self.next_temp_read_time = monotonic()
         self.state_change_listeners = []
 
-    def add_state_change_listener(self, listener):
-        self.state_change_listeners.append(listener)
-
     def update(self):
         time_now = monotonic()
         if time_now >= self.next_temp_read_time:
-            self._check_temperature()
+            self._manage_temperature()
             self.next_temp_read_time = time_now + TEMP_CHECK_INTERVAL_SECS
 
     def change_desired_temp(self, amount):
@@ -36,7 +33,7 @@ class TempMgr:
         self.next_temp_read_time = monotonic()
         self.desired_temp_changed = True
 
-    def _check_temperature(self):
+    def _manage_temperature(self):
         if self.shutoff and self.shutoff.beyond_suppression_period():
             self.shutoff = None
         self.current_temp, self.current_humidity = self.temp_sensor.read()
@@ -53,7 +50,7 @@ class TempMgr:
             hs = heater_should_be_on if heater_state_changing else None
             log_state(HEAT_PSEUDO_TEMP, self.current_temp, desired_temp=dt, heat_state=hs)
             self.desired_temp_changed = False
-            self._notify_listeners()
+            self.display.show(self.current_temp, self.desired_temp)
 
     def _change_heater_state(self, heater_should_be_on, degrees_of_heat_needed):
         if heater_should_be_on:
@@ -63,7 +60,3 @@ class TempMgr:
             self.heater_is_on = False
 
         self.heater.enable(on=heater_should_be_on)
-
-    def _notify_listeners(self):
-        for l in self.state_change_listeners:
-            l(self.current_temp, self.desired_temp)

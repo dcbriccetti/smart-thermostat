@@ -11,14 +11,15 @@ TOO_HOT_COLOR   = (255,   0,   0), (255,  64,   0)
 class Display:
     'Displays the difference between the measured and desired temperatures on LEDs'
 
-    def __init__(self):
+    def __init__(self, temp_change_increment):
+        self.temp_change_increment = temp_change_increment
         self.pixels = neopixel.NeoPixel(NEOPIXEL, 10, brightness=0.1, auto_write=False)
         self.turn_off_display_time = monotonic()
         self.display_on = False
 
-    def show_temp_difference(self, current_temp, desired_temp, temp_change_increment):
+    def show(self, current_temp, desired_temp):
         temp_diff = desired_temp - current_temp
-        incremental_increase = round(temp_diff / temp_change_increment)
+        incremental_increase = round(temp_diff / self.temp_change_increment)
         if abs(incremental_increase) > 10:
             increase = round(temp_diff)
             color_index = 1

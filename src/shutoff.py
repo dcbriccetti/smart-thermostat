@@ -4,6 +4,8 @@ HEAT_REENABLE_AFTER_SECS = 180
 
 
 class AnticipatoryShutoff:
+    'Determines when to turn off heat to control temperature overshoot'
+
     def __init__(self, knob, degrees_of_heat_needed):
         self.knob = knob
         self.period_start = monotonic() + self.knob.value_between(30, 60 * 10)
