@@ -2,7 +2,7 @@ from time import monotonic
 from shutoff import AnticipatoryShutoff
 from logger import log_state
 
-TEMP_CHECK_INTERVAL_SECS = 15
+TEMP_CHECK_INTERVAL_SECS = 45
 HEAT_PSEUDO_TEMP = 23
 
 
@@ -55,7 +55,7 @@ class ThermoController:
     def _change_heater_state(self, heater_should_be_on, degrees_of_heat_needed):
         if heater_should_be_on:
             self.heater_is_on = True
-            self.shutoff = AnticipatoryShutoff(self.knob, degrees_of_heat_needed)
+            self.shutoff = AnticipatoryShutoff(self.knob) if degrees_of_heat_needed < 1 else None
         else:
             self.heater_is_on = False
 
