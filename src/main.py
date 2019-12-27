@@ -1,27 +1,44 @@
 'Smart thermostat project main module'
 
-from cpx.sensor import Sensor
-from cpx.timingknob import TimingKnob
-from cpx.heaterrelay import HeaterRelay
-from cpx.buttons import Buttons
-from cpx.display import Display
+from time import sleep
+from flask import Flask, render_template, jsonify, request
+import threading
+from rpi.sensor import Sensor
+from rpi.heaterrelay import HeaterRelay
 from thermocontroller import ThermoController
 
 TEMP_CHANGE_INCREMENT = 0.1
 DEFAULT_DESIRED_TEMP = 21.0
 BUTTON_REPEAT_DELAY_SECS = 0.3
 
-buttons = Buttons(BUTTON_REPEAT_DELAY_SECS)
-buttons.on_change(
-    lambda button_index:
-    controller.change_desired_temp((-1, 1)[button_index] * TEMP_CHANGE_INCREMENT))
+app = Flask(__name__)
+controller = ThermoController(Sensor(), HeaterRelay(), DEFAULT_DESIRED_TEMP)
 
-display = Display(TEMP_CHANGE_INCREMENT)
 
-controller = ThermoController(
-    Sensor(), TimingKnob(), HeaterRelay(), display, DEFAULT_DESIRED_TEMP)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-while True:
-    controller.update()
-    buttons.update()
-    display.update()
+
+@app.route('/temperature')
+def temperature():
+    return jsonify(controller.current_temp)
+
+
+@app.route('/desired', methods=('PUT',))
+def desired():
+    new_temp = float(request.get_data())
+    controller.set_desired_temp(new_temp)
+    print('desired', new_temp)
+    return 'OK'
+
+
+def controller_thread():
+    while True:
+        controller.update()
+        sleep(1)
+
+
+threading.Thread(target=controller_thread).start()
+
+app.run(host='0.0.0.0', threaded=True, debug=True)
