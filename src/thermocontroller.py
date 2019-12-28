@@ -41,7 +41,7 @@ class ThermoController:
             self._change_heater_state(heater_should_be_on)
 
         hs = heater_should_be_on if heater_state_changing else None
-        log_state(HEAT_PSEUDO_TEMP, self.current_temp, self.desired_temp, heat_state=hs)
+        log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
 
     def _change_heater_state(self, heater_should_be_on):
         if heater_should_be_on:
