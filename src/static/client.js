@@ -8,9 +8,8 @@ class Client {
     fetch('temperature').then((data) => {
       return data.json();
     }).then(j => {
-      console.log(j);
       document.getElementById('temperature').textContent = j.toFixed(1);
-      setTimeout(client.updateTemperature, 2000);
+      setTimeout(client.updateTemperature, 30000);
     });
   }
 
@@ -19,6 +18,9 @@ class Client {
       fetch('desired', {
           method: 'PUT',
           body: desired
+      }).then(response => {
+	  console.log('Desired put response', response);
+	  return response;
       });
   }
 }
