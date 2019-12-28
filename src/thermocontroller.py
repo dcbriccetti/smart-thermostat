@@ -35,7 +35,7 @@ class ThermoController:
     def _manage_temperature(self):
         if self.shutoff and self.shutoff.beyond_suppression_period():
             self.shutoff = None
-        self.current_temp, self.current_humidity = self.temp_sensor.read()
+        self.current_humidity, self.current_temp = self.temp_sensor.read()
         degrees_of_heat_needed = self.desired_temp - self.current_temp
         heater_should_be_on = degrees_of_heat_needed > 0 and not (self.shutoff and self.shutoff.in_suppression_period())
         heater_state_changing = heater_should_be_on != self.heater_is_on

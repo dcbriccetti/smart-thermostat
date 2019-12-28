@@ -9,7 +9,7 @@ class Client {
       return data.json();
     }).then(j => {
       console.log(j);
-      document.getElementById('temperature').textContent = j;
+      document.getElementById('temperature').textContent = j.toFixed(1);
       setTimeout(client.updateTemperature, 2000);
     });
   }

@@ -3,8 +3,8 @@
 from time import sleep
 from flask import Flask, render_template, jsonify, request
 import threading
-from mock.sensor import Sensor
-from mock.heaterrelay import HeaterRelay
+from rpi.sensor import Sensor
+from rpi.heaterrelay import HeaterRelay
 from thermocontroller import ThermoController
 
 TEMP_CHANGE_INCREMENT = 0.1
@@ -41,4 +41,4 @@ def controller_thread():
 
 threading.Thread(target=controller_thread).start()
 
-app.run(threaded=True, debug=True)
+app.run(host='0.0.0.0', threaded=True, debug=True)
