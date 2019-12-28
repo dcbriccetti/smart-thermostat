@@ -1,4 +1,3 @@
-from typing import List
 from queue import Queue, Full
 from time import monotonic
 from logger import log_state
@@ -15,7 +14,7 @@ class ThermoController:
         self.current_humidity = None
         self.heater_is_on = False
         self.shutoff = None
-        self.state_queues: List[Queue] = []
+        self.state_queues = []
         self.next_temp_read_time = monotonic()
 
     def add_listener(self, queue: Queue):
