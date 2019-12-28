@@ -1,19 +1,11 @@
-from board import A5, A6
-import adafruit_dht
+import Adafruit_DHT
 
 
 class Sensor:
     'Provides the temperature and humidity'
 
-    def __init__(self, pin=A6):
-        self.dht = adafruit_dht.DHT22(pin)
+    def __init__(self, pin=4):
+        self.pin = pin
 
     def read(self):
-        while True:  # Try until we have no error, and reasonable values
-            try:
-                temp = self.dht.temperature
-                humidity = self.dht.humidity
-                if 0 < temp < 50:
-                    return temp, humidity
-            except RuntimeError as e:
-                pass
+        return Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, self.pin)
