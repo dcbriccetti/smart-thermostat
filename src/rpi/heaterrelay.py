@@ -11,5 +11,4 @@ class HeaterRelay:
         self.heater.value = True
 
     def enable(self, on=True):
-        print('enable:', on)
         self.heater.value = not on  # False value turns on relay
