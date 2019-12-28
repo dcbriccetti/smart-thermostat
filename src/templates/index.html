@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link href="static/bootstrap.min.css" rel="stylesheet"/>
+    <title>Smart Thermostat</title>
+</head>
+<body>
+
+<div class="container">
+    <h1>Current Temperature: <span id="temperature"></span></h1>
+
+    <div class="row">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="desired">Desired Temperature: <span id="display-desired">21</span></label>
+                <input id="desired" class='form-control' type="range" value='21'
+                       min='15' max='25' step="0.1" onChange="client.setDesired(this.value);">
+            </div>
+        </div>
+        <div id='visualization' class="col-sm">
+        </div>
+    </div>
+</div>
+
+<script src="static/client.js"></script>
+</body>
+</html>
