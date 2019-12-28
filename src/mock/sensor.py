@@ -2,10 +2,10 @@ from random import randint
 
 
 class Sensor:
-    'Provides the temperature and humidity'
+    'Provides the humidity and temperature'
 
     def __init__(self):
         pass
 
     def read(self):
-        return 20 + randint(0, 15) / 10.0, 50.0
+        return 50, 20 + randint(0, 15) / 10.0

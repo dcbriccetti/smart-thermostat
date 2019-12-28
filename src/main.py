@@ -1,7 +1,9 @@
 'Smart thermostat project main module'
 
 from time import sleep
-from flask import Flask, render_template, jsonify, request
+from queue import Queue
+from flask import Flask, render_template, request, Response
+import json
 import threading
 from rpi.sensor import Sensor
 from rpi.heaterrelay import HeaterRelay
@@ -20,16 +22,22 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/temperature')
-def temperature():
-    return jsonify(controller.current_temp)
-
-
 @app.route('/desired', methods=('PUT',))
 def desired():
-    new_temp = float(request.get_data())
-    controller.set_desired_temp(new_temp)
+    controller.set_desired_temp(float(request.get_data()))
     return ''
+
+
+@app.route('/stream')
+def stream():
+    stream_state_queue = Queue(maxsize=5)
+    controller.add_listener(stream_state_queue)
+
+    def event_stream():
+        while True:
+            yield f'data: {json.dumps(stream_state_queue.get())}\n\n'
+
+    return Response(event_stream(), mimetype="text/event-stream")
 
 
 def controller_thread():

@@ -1,7 +1,8 @@
+from typing import List
+from queue import Queue, Full
 from time import monotonic
 from logger import log_state
 
-TEMP_CHECK_INTERVAL_SECS = 30
 HEAT_PSEUDO_TEMP = 23
 
 
@@ -14,22 +15,13 @@ class ThermoController:
         self.current_humidity = None
         self.heater_is_on = False
         self.shutoff = None
+        self.state_queues: List[Queue] = []
         self.next_temp_read_time = monotonic()
+
+    def add_listener(self, queue: Queue):
+        self.state_queues.append(queue)
 
     def update(self):
-        time_now = monotonic()
-        if time_now >= self.next_temp_read_time:
-            self._manage_temperature()
-            self.next_temp_read_time = time_now + TEMP_CHECK_INTERVAL_SECS
-
-    def set_desired_temp(self, temperature):
-        self.desired_temp = temperature
-        self.next_temp_read_time = monotonic()
-
-    def change_desired_temp(self, amount):
-        self.set_desired_temp(self.desired_temp + amount)
-
-    def _manage_temperature(self):
         if self.shutoff and self.shutoff.beyond_suppression_period():
             self.shutoff = None
         self.current_humidity, self.current_temp = self.temp_sensor.read()
@@ -41,7 +33,25 @@ class ThermoController:
             self._change_heater_state(heater_should_be_on)
 
         hs = heater_should_be_on if heater_state_changing else None
+        self.enqueue_state()
         log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
+
+    def set_desired_temp(self, temperature):
+        self.desired_temp = temperature
+        self.next_temp_read_time = monotonic()
+
+    def change_desired_temp(self, amount):
+        self.set_desired_temp(self.desired_temp + amount)
+
+    def enqueue_state(self):
+        for state_queue in self.state_queues:
+            try:
+                state_queue.put_nowait({
+                    'current_temp': self.current_temp, 'desired_temp': self.desired_temp,
+                    'current_humidity': self.current_humidity})
+            except Full:
+                pass
+                #print(f'queue {state_queue} is full')
 
     def _change_heater_state(self, heater_should_be_on):
         if heater_should_be_on:

@@ -11,10 +11,11 @@
 <div class="container">
   <div class="row">
     <h1>Smart Thermostat</h1>
-        <h1>Current: <span id="temperature"></span></h1>
+        <h2>Humidity: <span id="humidity"></span></h2>
+        <h2>Temperature: <span id="temperature"></span></h2>
+        <h2>Desired Temperature: <span id="display-desired"></span></h2>
         <div class="col-sm">
             <div class="form-group">
-                <label style='font-size: 200%' for="desired">Desired: <span id="display-desired">21</span></label>
                 <input id="desired" class='form-control' type="range" value='21'
                        min='15' max='25' step="0.1" onChange="client.setDesired(this.value);">
             </div>

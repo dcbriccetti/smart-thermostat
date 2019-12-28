@@ -2,7 +2,7 @@ import Adafruit_DHT
 
 
 class Sensor:
-    'Provides the temperature and humidity'
+    'Provides the humidity and temperature'
 
     def __init__(self, pin=20):
         self.pin = pin
