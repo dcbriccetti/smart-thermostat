@@ -31,7 +31,7 @@ def desired():
 @app.route('/status')
 def status():
     stream_state_queue = Queue(maxsize=5)
-    controller.add_listener(stream_state_queue, time_interval=request.args.get('interval'))
+    controller.add_listener(stream_state_queue)
 
     def event_stream():
         while True:

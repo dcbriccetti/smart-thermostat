@@ -22,15 +22,11 @@ class ThermoController:
         self.heater_is_on = False
         self.shutoff = None
         self.state_queues = []
-        self.time_interval_state_queues = []
         self.next_temp_read_time = monotonic()
 
-    def add_listener(self, queue: Queue, time_interval=False):
-        if time_interval:
-            self.time_interval_state_queues.append(queue)
-        else:
-            self.state_queues.append(queue)
-            self._enqueue_state_to_single_queue(queue)
+    def add_listener(self, queue: Queue):
+        self.state_queues.append(queue)
+        self._enqueue_state_to_single_queue(queue)
 
     def update(self):
         time_now = monotonic()
@@ -43,9 +39,6 @@ class ThermoController:
             if not (self.current_humidity and self.current_temp):
                 self._change_heater_state(False)
                 raise SensorReadFailure()
-
-            for queue in self.time_interval_state_queues:
-                self._enqueue_state_to_single_queue(queue)
 
         degrees_of_heat_needed = self.desired_temp - self.current_temp
         heater_should_be_on = degrees_of_heat_needed > 0 and not (self.shutoff and self.shutoff.in_suppression_period())

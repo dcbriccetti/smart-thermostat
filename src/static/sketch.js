@@ -21,7 +21,7 @@ function draw() {
         point(x, cty * vscale);
         stroke('green');
         point(x, dty * vscale);
-        if (rec.heat_is_on) {
+        if (rec.heater_is_on) {
             stroke('red');
             point(x, 3);
         }
