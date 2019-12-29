@@ -1,17 +1,13 @@
 class Client {
   constructor() {
-    const source = new EventSource('/stream');
-    source.onmessage = event => {
-      console.log(event);
-      this.setUi(JSON.parse(event.data));
-    };
+    new EventSource('/status').onmessage = event => this.setUi(JSON.parse(event.data));
   }
 
   setUi(state) {
-    document.getElementById('temperature').textContent = state.current_temp.toFixed(1);
-    document.getElementById('humidity').textContent = state.current_humidity.toFixed(1);
-    document.getElementById('display-desired').textContent =
-      document.getElementById('desired').value = state.desired_temp.toFixed(1);
+    const el = (id) => document.getElementById(id);
+    el('temperature').textContent = state.current_temp.toFixed(1);
+    el('humidity').textContent = state.current_humidity.toFixed(1);
+    el('display-desired').textContent = el('desired').value = state.desired_temp.toFixed(1);
   }
 
   setDesired(desired) {

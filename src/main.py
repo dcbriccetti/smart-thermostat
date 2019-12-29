@@ -28,8 +28,8 @@ def desired():
     return ''
 
 
-@app.route('/stream')
-def stream():
+@app.route('/status')
+def status():
     stream_state_queue = Queue(maxsize=5)
     controller.add_listener(stream_state_queue)
 
@@ -43,7 +43,7 @@ def stream():
 def controller_thread():
     while True:
         controller.update()
-        sleep(1)
+        sleep(0.1)
 
 
 threading.Thread(target=controller_thread).start()
