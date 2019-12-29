@@ -32,19 +32,19 @@ class ThermoController:
             if self.shutoff and self.shutoff.beyond_suppression_period():
                 self.shutoff = None
             self.current_humidity, self.current_temp = self.temp_sensor.read()
-            degrees_of_heat_needed = self.desired_temp - self.current_temp
-            heater_should_be_on = degrees_of_heat_needed > 0 and not (self.shutoff and self.shutoff.in_suppression_period())
-            heater_state_changing = heater_should_be_on != self.heater_is_on
+        degrees_of_heat_needed = self.desired_temp - self.current_temp
+        heater_should_be_on = degrees_of_heat_needed > 0 and not (self.shutoff and self.shutoff.in_suppression_period())
+        heater_state_changing = heater_should_be_on != self.heater_is_on
 
-            if heater_state_changing:
-                self._change_heater_state(heater_should_be_on)
+        if heater_state_changing:
+            self._change_heater_state(heater_should_be_on)
 
-            if self.current_temp != self.previous_temp or heater_state_changing or self.desired_temp_changed:
-                self.previous_temp = self.current_temp
-                self.desired_temp_changed = False
-                hs = heater_should_be_on if heater_state_changing else None
-                self._enqueue_state_to_all_queues()
-                log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
+        if self.current_temp != self.previous_temp or heater_state_changing or self.desired_temp_changed:
+            self.previous_temp = self.current_temp
+            self.desired_temp_changed = False
+            hs = heater_should_be_on if heater_state_changing else None
+            self._enqueue_state_to_all_queues()
+            log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
 
     def set_desired_temp(self, temperature):
         if temperature != self.desired_temp:
