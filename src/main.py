@@ -5,8 +5,8 @@ from queue import Queue
 from flask import Flask, render_template, request, Response
 import json
 import threading
-from rpi.sensor import Sensor
-from rpi.heaterrelay import HeaterRelay
+from mock.sensor import Sensor
+from mock.heaterrelay import HeaterRelay
 from thermocontroller import ThermoController
 
 TEMP_CHANGE_INCREMENT = 0.1
@@ -31,7 +31,7 @@ def desired():
 @app.route('/status')
 def status():
     stream_state_queue = Queue(maxsize=5)
-    controller.add_listener(stream_state_queue)
+    controller.add_listener(stream_state_queue, time_interval=request.args.get('interval'))
 
     def event_stream():
         while True:

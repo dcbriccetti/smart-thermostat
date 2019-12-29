@@ -1,5 +1,5 @@
 from queue import Queue, Full
-from time import monotonic
+from time import monotonic, time
 from logger import log_state
 
 TEMP_CHECK_INTERVAL_SECS = 30
@@ -18,11 +18,15 @@ class ThermoController:
         self.heater_is_on = False
         self.shutoff = None
         self.state_queues = []
+        self.time_interval_state_queues = []
         self.next_temp_read_time = monotonic()
 
-    def add_listener(self, queue: Queue):
-        self.state_queues.append(queue)
-        self._enqueue_state_to_single_queue(queue)
+    def add_listener(self, queue: Queue, time_interval=False):
+        if time_interval:
+            self.time_interval_state_queues.append(queue)
+        else:
+            self.state_queues.append(queue)
+            self._enqueue_state_to_single_queue(queue)
 
     def update(self):
         time_now = monotonic()
@@ -32,6 +36,10 @@ class ThermoController:
             if self.shutoff and self.shutoff.beyond_suppression_period():
                 self.shutoff = None
             self.current_humidity, self.current_temp = self.temp_sensor.read()
+
+            for queue in self.time_interval_state_queues:
+                self._enqueue_state_to_single_queue(queue)
+
         degrees_of_heat_needed = self.desired_temp - self.current_temp
         heater_should_be_on = degrees_of_heat_needed > 0 and not (self.shutoff and self.shutoff.in_suppression_period())
         heater_state_changing = heater_should_be_on != self.heater_is_on
@@ -58,6 +66,7 @@ class ThermoController:
     def _enqueue_state_to_single_queue(self, state_queue):
         try:
             state_queue.put_nowait({
+                'time': time(),
                 'current_temp': self.current_temp, 'desired_temp': self.desired_temp,
                 'current_humidity': self.current_humidity})
         except Full:

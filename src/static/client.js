@@ -4,6 +4,7 @@ class Client {
   }
 
   setUi(state) {
+    addVizState(state);
     const el = (id) => document.getElementById(id);
     el('temperature').textContent = state.current_temp.toFixed(1);
     el('humidity').textContent = state.current_humidity.toFixed(1);
