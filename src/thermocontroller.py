@@ -6,9 +6,13 @@ TEMP_CHECK_INTERVAL_SECS = 30
 HEAT_PSEUDO_TEMP = 23
 
 
+class SensorReadFailure(Exception):
+    pass
+
+
 class ThermoController:
-    def __init__(self, temp_sensor, heater, desired_temp):
-        self.temp_sensor = temp_sensor
+    def __init__(self, sensor, heater, desired_temp):
+        self.sensor = sensor
         self.heater = heater
         self.desired_temp = desired_temp
         self.current_temp = None
@@ -35,7 +39,10 @@ class ThermoController:
 
             if self.shutoff and self.shutoff.beyond_suppression_period():
                 self.shutoff = None
-            self.current_humidity, self.current_temp = self.temp_sensor.read()
+            self.current_humidity, self.current_temp = self.sensor.read()
+            if not (self.current_humidity and self.current_temp):
+                self._change_heater_state(False)
+                raise SensorReadFailure()
 
             for queue in self.time_interval_state_queues:
                 self._enqueue_state_to_single_queue(queue)
@@ -67,8 +74,10 @@ class ThermoController:
         try:
             state_queue.put_nowait({
                 'time': time(),
-                'current_temp': self.current_temp, 'desired_temp': self.desired_temp,
-                'current_humidity': self.current_humidity})
+                'current_temp': self.current_temp,
+                'desired_temp': self.desired_temp,
+                'current_humidity': self.current_humidity,
+                'heater_is_on': self.heater_is_on})
         except Full:
             pass
 

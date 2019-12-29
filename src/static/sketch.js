@@ -16,10 +16,15 @@ function draw() {
         const dty = rec.desired_temp - 15;
 
         const vscale = 9;
+        strokeWeight(3);
         stroke('blue');
-        line(x, 0, x, cty * vscale);
+        point(x, cty * vscale);
         stroke('green');
         point(x, dty * vscale);
+        if (rec.heat_is_on) {
+            stroke('red');
+            point(x, 3);
+        }
     }
     noLoop();
 }
