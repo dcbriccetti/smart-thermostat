@@ -21,6 +21,7 @@ class ThermoController:
 
     def add_listener(self, queue: Queue):
         self.state_queues.append(queue)
+        self._enqueue_state_to_single_queue(queue)
 
     def update(self):
         if self.shutoff and self.shutoff.beyond_suppression_period():
@@ -37,7 +38,7 @@ class ThermoController:
             self.previous_temp = self.current_temp
             self.desired_temp_changed = False
             hs = heater_should_be_on if heater_state_changing else None
-            self.enqueue_state()
+            self._enqueue_state_to_all_queues()
             log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
 
     def set_desired_temp(self, temperature):
@@ -48,15 +49,16 @@ class ThermoController:
     def change_desired_temp(self, amount):
         self.set_desired_temp(self.desired_temp + amount)
 
-    def enqueue_state(self):
+    def _enqueue_state_to_all_queues(self):
         for state_queue in self.state_queues:
-            try:
-                state_queue.put_nowait({
-                    'current_temp': self.current_temp, 'desired_temp': self.desired_temp,
-                    'current_humidity': self.current_humidity})
-            except Full:
-                pass
-                #print(f'queue {state_queue} is full')
+            self._enqueue_state_to_single_queue(state_queue)
+
+    def _enqueue_state_to_single_queue(self, state_queue):
+        try:
+            state_queue.put_nowait({'current_temp': self.current_temp, 'desired_temp': self.desired_temp,
+                'current_humidity': self.current_humidity})
+        except Full:
+            pass  # print(f'queue {state_queue} is full')
 
     def _change_heater_state(self, heater_should_be_on):
         if heater_should_be_on:
