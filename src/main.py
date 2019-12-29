@@ -5,8 +5,8 @@ from queue import Queue
 from flask import Flask, render_template, request, Response
 import json
 import threading
-from mock.sensor import Sensor
-from mock.heaterrelay import HeaterRelay
+from rpi.sensor import Sensor
+from rpi.heaterrelay import HeaterRelay
 from thermocontroller import ThermoController
 
 TEMP_CHANGE_INCREMENT = 0.1

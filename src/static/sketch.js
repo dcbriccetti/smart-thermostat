@@ -7,8 +7,7 @@ function setup() {
 function draw() {
     background('lightgray');
     translate(0, height);
-    scale(1, -9);
-    stroke('blue');
+    scale(1, -1);
     const xoff = max(0, stateRecords.length - width);
     for (let i = xoff; i < stateRecords.length; i++) {
         const rec = stateRecords[i];
@@ -16,23 +15,11 @@ function draw() {
         const cty = rec.current_temp - 15;
         const dty = rec.desired_temp - 15;
 
-        function drawDesired() {
-            stroke('green');
-            line(x, 0, x, dty);
-        }
-
-        function drawCurrent() {
-            stroke('blue');
-            line(x, 0, x, cty);
-        }
-
-        if (cty > dty) {
-            drawCurrent();
-            drawDesired();
-        } else {
-            drawDesired();
-            drawCurrent();
-        }
+        const vscale = 9;
+        stroke('blue');
+        line(x, 0, x, cty * vscale);
+        stroke('green');
+        point(x, dty * vscale);
     }
     noLoop();
 }
