@@ -1,17 +1,19 @@
+let stateRecords = [];
+
 function setup() {
     const vis = $("#visualization");
     createCanvas(vis.width(), vis.height()).parent("visualization");
 }
 
-let stateRecords = [];
-
 function draw() {
+    frameRate(1);
     background('lightgray');
     translate(0, height);
     scale(1, -1);
-    const xoff = max(0, stateRecords.length - width);
-    for (let i = xoff; i < stateRecords.length; i++) {
-        const rec = stateRecords[i];
+    const expanded = expand(stateRecords);
+    const xoff = max(0, expanded.length - width);
+    for (let i = xoff; i < expanded.length; i++) {
+        const rec = expanded[i];
         const x = i - xoff;
         const cty = rec.current_temp - 15;
         const dty = rec.desired_temp - 15;
@@ -28,7 +30,7 @@ function draw() {
             point(x, 5);
         }
     }
-    noLoop();
+    // noLoop();
 }
 
 function addStateRecord(state) {
@@ -39,4 +41,20 @@ function addStateRecord(state) {
 function addAllStateRecords(records) {
     stateRecords = records;
     loop();
+}
+
+function expand(states) {
+    const exp = [];
+
+    let time = states[0].time;
+
+    states.forEach((state, i) => {
+      exp.push(state);
+      while (i < states.length - 1 && time < states[i+1].time) {
+        time += 15;
+        exp.push({time: time, current_temp: state.current_temp, desired_temp: state.desired_temp, heater_is_on: state.heater_is_on});
+      }
+    });
+
+    return exp;
 }
