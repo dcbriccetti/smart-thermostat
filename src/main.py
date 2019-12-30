@@ -35,7 +35,8 @@ def status():
 
     def event_stream():
         while True:
-            yield 'data: {}\n\n'.format(json.dumps(stream_state_queue.get()))
+            state = stream_state_queue.get()
+            yield 'data: {}\n\n'.format(json.dumps(state))
 
     return Response(event_stream(), mimetype="text/event-stream")
 
