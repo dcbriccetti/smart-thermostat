@@ -44,6 +44,8 @@ function addAllStateRecords(records) {
 }
 
 function expand(states) {
+    if (states.length === 0) return states;
+
     const exp = [];
 
     let time = states[0].time;
