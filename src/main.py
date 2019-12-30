@@ -2,7 +2,7 @@
 
 from time import sleep
 from queue import Queue
-from flask import Flask, render_template, request, Response
+from flask import Flask, jsonify, render_template, request, Response
 import json
 import threading
 from rpi.sensor import Sensor
@@ -38,6 +38,11 @@ def status():
             yield 'data: {}\n\n'.format(json.dumps(stream_state_queue.get()))
 
     return Response(event_stream(), mimetype="text/event-stream")
+
+
+@app.route('/all-status')
+def all_status():
+    return jsonify(controller.status_history)
 
 
 def controller_thread():

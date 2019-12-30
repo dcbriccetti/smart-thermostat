@@ -1,7 +1,7 @@
 function setup() {
     const vis = $("#visualization");
     createCanvas(vis.width(), vis.height()).parent("visualization");
-    new EventSource('/status?interval=y').onmessage = event => addVizState(JSON.parse(event.data));
+    new EventSource('/status?interval=y').onmessage = event => addStateRecord(JSON.parse(event.data));
 }
 
 function draw() {
@@ -15,7 +15,7 @@ function draw() {
         const cty = rec.current_temp - 15;
         const dty = rec.desired_temp - 15;
 
-        const vscale = 9;
+        const vscale = 18;
         strokeWeight(3);
         stroke('blue');
         point(x, cty * vscale);
@@ -29,9 +29,14 @@ function draw() {
     noLoop();
 }
 
-const stateRecords = [];
+let stateRecords = [];
 
-function addVizState(state) {
+function addStateRecord(state) {
     stateRecords.push(state);
+    loop();
+}
+
+function addAllStateRecords(records) {
+    stateRecords = records;
     loop();
 }

@@ -1,3 +1,4 @@
+from typing import Dict
 from queue import Queue, Full
 from time import monotonic, time
 from logger import log_state
@@ -22,11 +23,12 @@ class ThermoController:
         self.heater_is_on = False
         self.shutoff = None
         self.state_queues = []
+        self.status_history = []
         self.next_temp_read_time = monotonic()
 
     def add_listener(self, queue: Queue):
         self.state_queues.append(queue)
-        self._enqueue_state_to_single_queue(queue)
+        self._enqueue_state_to_single_queue(self.current_state_dict(), queue)
 
     def update(self):
         time_now = monotonic()
@@ -51,7 +53,9 @@ class ThermoController:
             self.previous_temp = self.current_temp
             self.desired_temp_changed = False
             hs = heater_should_be_on if heater_state_changing else None
-            self._enqueue_state_to_all_queues()
+            state = self.current_state_dict()
+            self.status_history.append(state)
+            self._enqueue_state_to_all_queues(state)
             log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
 
     def set_desired_temp(self, temperature):
@@ -59,20 +63,19 @@ class ThermoController:
             self.desired_temp = temperature
             self.desired_temp_changed = True
 
-    def _enqueue_state_to_all_queues(self):
+    def _enqueue_state_to_all_queues(self, state: Dict):
         for state_queue in self.state_queues:
-            self._enqueue_state_to_single_queue(state_queue)
+            self._enqueue_state_to_single_queue(state, state_queue)
 
-    def _enqueue_state_to_single_queue(self, state_queue):
+    def _enqueue_state_to_single_queue(self, state: Dict, state_queue: Queue):
         try:
-            state_queue.put_nowait({
-                'time': time(),
-                'current_temp': self.current_temp,
-                'desired_temp': self.desired_temp,
-                'current_humidity': self.current_humidity,
-                'heater_is_on': self.heater_is_on})
+            state_queue.put_nowait(state)
         except Full:
             pass
+
+    def current_state_dict(self) -> Dict[str, str]:
+        return {'time': time(), 'current_temp': self.current_temp, 'desired_temp': self.desired_temp,
+            'current_humidity': self.current_humidity, 'heater_is_on': self.heater_is_on}
 
     def _change_heater_state(self, heater_should_be_on):
         if heater_should_be_on:

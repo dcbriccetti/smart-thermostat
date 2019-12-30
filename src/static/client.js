@@ -1,10 +1,20 @@
 class Client {
   constructor() {
-    new EventSource('/status').onmessage = event => this.setUi(JSON.parse(event.data));
+    fetch('all-status').then(r => r.json()).then(j => addAllStateRecords(j));
+    new EventSource('/status').onmessage = event => {
+      const data = event.data;
+      try {
+        console.log('parsing', data);
+        const json = JSON.parse(data);
+        this.processEvent(json);
+      } catch (e) {
+        console.log(e, data);
+      }
+    }
   }
 
-  setUi(state) {
-    addVizState(state);
+  processEvent(state) {
+    addStateRecord(state);
     const el = (id) => document.getElementById(id);
     el('temperature').textContent = state.current_temp.toFixed(1);
     el('humidity').textContent = state.current_humidity.toFixed(1);
