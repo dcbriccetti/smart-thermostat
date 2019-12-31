@@ -1,14 +1,11 @@
 from typing import Dict
 from queue import Queue, Full
-from time import monotonic, time
+from time import monotonic, time, sleep
 from logger import log_state
+from sensorfail import SensorReadFailure
 
 TEMP_CHECK_INTERVAL_SECS = 30
 HEAT_PSEUDO_TEMP = 23
-
-
-class SensorReadFailure(Exception):
-    pass
 
 
 class ThermoController:
@@ -30,17 +27,30 @@ class ThermoController:
         self.state_queues.append(queue)
         self._enqueue_state_to_single_queue(self.current_state_dict(), queue)
 
-    def update(self):
+    def run(self):
+        while True:
+            try:
+                self._update()
+            except SensorReadFailure as f:
+                print('Pausing after', f)
+                sleep(30)
+            sleep(0.1)
+
+    def set_desired_temp(self, temperature):
+        if temperature != self.desired_temp:
+            self.desired_temp = temperature
+            self.desired_temp_changed = True
+
+    def _update(self):
         time_now = monotonic()
         if time_now >= self.next_temp_read_time:
             self.next_temp_read_time = time_now + TEMP_CHECK_INTERVAL_SECS
 
             if self.shutoff and self.shutoff.beyond_suppression_period():
                 self.shutoff = None
+
             self.current_humidity, self.current_temp = self.sensor.read()
-            if not (self.current_humidity and self.current_temp):
-                self._change_heater_state(False)
-                raise SensorReadFailure()
+            self._change_heater_state(False)
 
         degrees_of_heat_needed = self.desired_temp - self.current_temp
         heater_should_be_on = degrees_of_heat_needed > 0 and not (self.shutoff and self.shutoff.in_suppression_period())
@@ -57,11 +67,6 @@ class ThermoController:
             self.status_history.append(state)
             self._enqueue_state_to_all_queues(state)
             log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
-
-    def set_desired_temp(self, temperature):
-        if temperature != self.desired_temp:
-            self.desired_temp = temperature
-            self.desired_temp_changed = True
 
     def _enqueue_state_to_all_queues(self, state: Dict):
         for state_queue in self.state_queues:
@@ -85,3 +90,4 @@ class ThermoController:
             self.heater_is_on = False
 
         self.heater.enable(on=heater_should_be_on)
+

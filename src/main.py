@@ -1,6 +1,5 @@
 'Smart thermostat project main module'
 
-from time import sleep
 from queue import Queue
 from flask import Flask, jsonify, render_template, request, Response
 import json
@@ -47,9 +46,7 @@ def all_status():
 
 
 def controller_thread():
-    while True:
-        controller.update()
-        sleep(0.1)
+    controller.run()
 
 
 threading.Thread(target=controller_thread).start()
