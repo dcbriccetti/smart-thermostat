@@ -7,6 +7,7 @@ class Client {
   processEvent(state) {
     addStateRecord(state);
     const el = id => document.getElementById(id);
+    el('outside-temperature').textContent = state.outside_temp.toFixed(1);
     el('temperature').textContent = state.current_temp.toFixed(1);
     el('humidity').textContent = state.current_humidity.toFixed(1);
     el('display-desired').textContent = el('desired').value = state.desired_temp.toFixed(1);

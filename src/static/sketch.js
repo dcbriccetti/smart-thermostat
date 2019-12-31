@@ -7,27 +7,38 @@ function setup() {
 
 function draw() {
     frameRate(1);
-    background('lightgray');
+    background('#e0e0e0');
     translate(0, height);
     scale(1, -1);
     const expanded = expand(stateRecords);
     const xoff = max(0, expanded.length - width);
+    function minOrMax(fn, iv) {
+        const rf = (a, c) => fn(a, c.current_temp, c.desired_temp, c.outside_temp);
+        return stateRecords.reduce(rf, iv);
+    }
+    const temp_min = minOrMax(Math.min, 50);
+    const temp_max = minOrMax(Math.max, -50);
+    const chartYBase = 8;
+
     for (let i = xoff; i < expanded.length; i++) {
         const rec = expanded[i];
         const x = i - xoff;
-        const cty = rec.current_temp - 15;
-        const dty = rec.desired_temp - 15;
+        const scy = y => map(y, temp_min, temp_max, chartYBase, height);
+        const cty = scy(rec.current_temp);
+        const dty = scy(rec.desired_temp);
+        const oat = scy(rec.outside_temp);
 
-        const vscale = 18;
         strokeWeight(3);
-        stroke('blue');
-        point(x, cty * vscale);
+        stroke('lightblue');
+        line(x, chartYBase, x, cty);
         stroke('green');
-        point(x, dty * vscale);
-        strokeWeight(5);
+        point(x, dty);
+        stroke('black');
+        point(x, oat);
+        strokeWeight(3);
         if (rec.heater_is_on) {
-            stroke('red');
-            point(x, 5);
+            stroke('orange');
+            point(x, 2);
         }
     }
     // noLoop();
@@ -54,7 +65,9 @@ function expand(states) {
       exp.push(state);
       while (i < states.length - 1 && time < states[i+1].time) {
         time += 15;
-        exp.push({time: time, current_temp: state.current_temp, desired_temp: state.desired_temp, heater_is_on: state.heater_is_on});
+        const interpolatedState = Object.assign({}, state);
+        interpolatedState.time = time;
+        exp.push(interpolatedState);
       }
     });
 

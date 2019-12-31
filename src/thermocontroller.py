@@ -3,8 +3,10 @@ from queue import Queue, Full
 from time import monotonic, time, sleep
 from logger import log_state
 from sensorfail import SensorReadFailure
+from metardecoder import outside_weather
 
 TEMP_CHECK_INTERVAL_SECS = 30
+OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 15
 HEAT_PSEUDO_TEMP = 23
 
 
@@ -13,6 +15,7 @@ class ThermoController:
         self.sensor = sensor
         self.heater = heater
         self.desired_temp = desired_temp
+        self.outside_temp = None
         self.current_temp = None
         self.current_humidity = None
         self.previous_temp = None
@@ -22,6 +25,7 @@ class ThermoController:
         self.state_queues = []
         self.status_history = []
         self.next_temp_read_time = monotonic()
+        self.next_outside_weather_read_time = monotonic()
 
     def add_listener(self, queue: Queue):
         self.state_queues.append(queue)
@@ -43,6 +47,10 @@ class ThermoController:
 
     def _update(self):
         time_now = monotonic()
+        if time_now >= self.next_outside_weather_read_time:
+            self.next_outside_weather_read_time = time_now + OUTSIDE_WEATHER_CHECK_INTERVAL_SECS
+            self.outside_temp = outside_weather()[0]
+
         if time_now >= self.next_temp_read_time:
             self.next_temp_read_time = time_now + TEMP_CHECK_INTERVAL_SECS
 
@@ -79,8 +87,13 @@ class ThermoController:
             pass
 
     def current_state_dict(self) -> Dict[str, str]:
-        return {'time': time(), 'current_temp': self.current_temp, 'desired_temp': self.desired_temp,
-            'current_humidity': self.current_humidity, 'heater_is_on': self.heater_is_on}
+        return {
+            'time': time(),
+            'outside_temp': self.outside_temp,
+            'current_temp': self.current_temp,
+            'desired_temp': self.desired_temp,
+            'current_humidity': self.current_humidity,
+            'heater_is_on': self.heater_is_on}
 
     def _change_heater_state(self, heater_should_be_on):
         if heater_should_be_on:
@@ -90,4 +103,3 @@ class ThermoController:
             self.heater_is_on = False
 
         self.heater.enable(on=heater_should_be_on)
-
