@@ -8,17 +8,18 @@ from rpi.sensor import Sensor
 from rpi.heaterrelay import HeaterRelay
 from thermocontroller import ThermoController
 
+WEATHER_STATION = 'KCCR'
 TEMP_CHANGE_INCREMENT = 0.1
 DEFAULT_DESIRED_TEMP = 21.0
 BUTTON_REPEAT_DELAY_SECS = 0.3
 
-controller = ThermoController(Sensor(), HeaterRelay(), DEFAULT_DESIRED_TEMP)
+controller = ThermoController(WEATHER_STATION, Sensor(), HeaterRelay(), DEFAULT_DESIRED_TEMP)
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', weather_station=WEATHER_STATION)
 
 
 @app.route('/desired', methods=('PUT',))

@@ -11,7 +11,8 @@ HEAT_PSEUDO_TEMP = 23
 
 
 class ThermoController:
-    def __init__(self, sensor, heater, desired_temp):
+    def __init__(self, weather_station, sensor, heater, desired_temp):
+        self.weather_station = weather_station
         self.sensor = sensor
         self.heater = heater
         self.desired_temp = desired_temp
@@ -49,7 +50,11 @@ class ThermoController:
         time_now = monotonic()
         if time_now >= self.next_outside_weather_read_time:
             self.next_outside_weather_read_time = time_now + OUTSIDE_WEATHER_CHECK_INTERVAL_SECS
-            self.outside_temp = outside_weather()[0]
+            ow = outside_weather(self.weather_station)
+            if ow:
+                self.outside_temp = ow[0]
+            else:
+                print('Unable to get outside temperature')
 
         if time_now >= self.next_temp_read_time:
             self.next_temp_read_time = time_now + TEMP_CHECK_INTERVAL_SECS
