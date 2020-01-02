@@ -1,31 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="UTF-8">
-    <link href="static/bootstrap.min.css" rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <title>Smart Thermostat</title>
     <style>
         #visualization {
+            margin-top: .5em;
             height: 250px;
+        }
+
+        .large-display {
+            font-size: 200%;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="row">
-        <h2>Smart Thermostat</h2>
-        <h3><span id="temperature"></span> °C, <span id="humidity"></span> % humidity, <span id="outside-temperature"></span> °C at {{ weather_station }}</h3>
-        <h3>Desired: <span id="display-desired"></span> °C</h3>
-        <div class="col-sm">
-            <div class="form-group">
-                <input id="desired" class='form-control' type="range" value='21'
-                       min='15' max='25' step="0.1" onChange="client.setDesired(this.value);">
-            </div>
-        </div>
-        <div id='visualization' class="col-sm"></div>
+<div class="container-fluid">
+    <h2>Smart Thermostat</h2>
+    <div class="large-display"><span id="temperature"></span> °C, <span id="humidity"></span> % humidity, <span
+            id="outside-temperature"></span> °C at {{ weather_station }}
     </div>
+    <div class="large-display"><span id="display-desired"></span> °C
+        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(1)">↑ 1 °</button>
+        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(0.1)">↑ 0.1 °</button>
+        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-1)">↓ 1 °</button>
+        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-0.1)">↓ 0.1 °</button>
+    </div>
+    <div id='visualization'></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
