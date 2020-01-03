@@ -15,6 +15,11 @@
         .large-display {
             font-size: 200%;
         }
+
+        .big-arrow {
+            font-size: 150%;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -25,9 +30,9 @@
             id="outside-temperature"></span> °C at {{ weather_station }}
     </div>
     <div class="large-display"><span id="display-desired"></span> °C
-        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(1)">↑ 1 °</button>
+        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(1)"><span class="big-arrow">↑</span> 1 °</button>
         <button type="button" class="btn btn-primary" onclick="client.adjustTemp(0.1)">↑ 0.1 °</button>
-        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-1)">↓ 1 °</button>
+        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-1)"><span class="big-arrow">↓</span> 1 °</button>
         <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-0.1)">↓ 0.1 °</button>
     </div>
     <div id='visualization'></div>

@@ -22,9 +22,9 @@ def index():
     return render_template('index.html', weather_station=WEATHER_STATION)
 
 
-@app.route('/desired', methods=('PUT',))
-def desired():
-    controller.set_desired_temp(float(request.get_data()))
+@app.route('/increase_temperature', methods=('PUT',))
+def increase_temperature():
+    controller.increase_temperature(float(request.get_data()))
     return ''
 
 

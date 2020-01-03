@@ -41,9 +41,9 @@ class ThermoController:
                 sleep(30)
             sleep(0.1)
 
-    def set_desired_temp(self, temperature):
-        if temperature != self.desired_temp:
-            self.desired_temp = temperature
+    def increase_temperature(self, amount: float):
+        if amount:
+            self.desired_temp += amount
             self.desired_temp_changed = True
 
     def _update(self):

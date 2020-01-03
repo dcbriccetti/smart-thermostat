@@ -1,6 +1,5 @@
 class Client {
-  constructor(starting_desired_temp) {
-    this.desired_temp = starting_desired_temp;
+  constructor() {
     fetch('all-status').then(r => r.json()).then(j => addAllStateRecords(j));
     new EventSource('/status').onmessage = event => this.processEvent(JSON.parse(event.data));
   }
@@ -15,12 +14,11 @@ class Client {
   }
 
   adjustTemp(amount) {
-    this.desired_temp += amount;
-    fetch('desired', {
+    fetch('increase_temperature', {
       method: 'PUT',
-      body: this.desired_temp
+      body: amount
     }).then(response => response);
   }
 }
 
-const client = new Client(21.0);
+const client = new Client();
