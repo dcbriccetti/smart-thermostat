@@ -37,11 +37,11 @@ function draw() {
         point(x, oat);
         strokeWeight(3);
         if (rec.heater_is_on) {
-            stroke('orange');
+            stroke('#9C2A00');
             point(x, 2);
         }
     }
-    // noLoop();
+    noLoop();
 }
 
 function addStateRecord(state) {
