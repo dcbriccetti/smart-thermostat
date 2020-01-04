@@ -4,6 +4,7 @@ from time import monotonic, time, sleep
 from logger import log_state
 from sensorfail import SensorReadFailure
 from metardecoder import outside_weather
+from schedule import Schedule
 
 TEMP_CHECK_INTERVAL_SECS = 30
 OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 15
@@ -27,6 +28,7 @@ class ThermoController:
         self.status_history = []
         self.next_temp_read_time = monotonic()
         self.next_outside_weather_read_time = monotonic()
+        self.schedule = Schedule()
 
     def add_listener(self, queue: Queue):
         self.state_queues.append(queue)
@@ -41,13 +43,22 @@ class ThermoController:
                 sleep(30)
             sleep(0.1)
 
+    def set_temperature(self, temperature):
+        self.desired_temp = temperature
+        self.desired_temp_changed = True
+
     def increase_temperature(self, amount: float):
         if amount:
-            self.desired_temp += amount
-            self.desired_temp_changed = True
+            self.set_temperature(self.desired_temp + amount)
 
     def _update(self):
         time_now = monotonic()
+
+        scheduled_temp = self.schedule.get_setting()
+        if scheduled_temp:
+            self.desired_temp = scheduled_temp
+            print('Making scheduled setting to', scheduled_temp)
+
         if time_now >= self.next_outside_weather_read_time:
             self.next_outside_weather_read_time = time_now + OUTSIDE_WEATHER_CHECK_INTERVAL_SECS
             ow = outside_weather(self.weather_station)

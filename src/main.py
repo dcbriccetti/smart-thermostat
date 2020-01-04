@@ -28,6 +28,12 @@ def increase_temperature():
     return ''
 
 
+@app.route('/set_temperature', methods=('PUT',))
+def set_temperature():
+    controller.set_temperature(float(request.get_data()))
+    return ''
+
+
 @app.route('/status')
 def status():
     stream_state_queue = Queue(maxsize=5)
