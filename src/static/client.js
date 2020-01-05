@@ -15,8 +15,15 @@ class Client {
 
   adjustTemp(amount) {
     fetch('increase_temperature', {
-      method: 'PUT',
+      method: 'POST',
       body: amount
+    }).then(response => response);
+  }
+
+  schedule() {
+    fetch('schedule', {
+      method: 'PUT',
+      body: document.getElementById('schedule').value
     }).then(response => response);
   }
 }

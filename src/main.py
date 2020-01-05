@@ -24,7 +24,7 @@ def index():
     return render_template('index.html', weather_station=WEATHER_STATION)
 
 
-@app.route('/increase_temperature', methods=('PUT',))
+@app.route('/increase_temperature', methods=('POST',))
 def increase_temperature():
     controller.increase_temperature(float(request.get_data()))
     return ''
@@ -33,6 +33,12 @@ def increase_temperature():
 @app.route('/set_temperature', methods=('PUT',))
 def set_temperature():
     controller.set_temperature(float(request.get_data()))
+    return ''
+
+
+@app.route('/schedule', methods=('PUT',))
+def schedule():
+    scheduler.set(request.get_data())
     return ''
 
 

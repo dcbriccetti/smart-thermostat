@@ -20,6 +20,11 @@
             font-size: 150%;
             font-weight: bold;
         }
+
+        #schedule {
+            margin-top: 0.7em;
+            width: 20em;
+        }
     </style>
 </head>
 <body>
@@ -36,6 +41,16 @@
         <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-0.1)">↓ 0.1 °</button>
     </div>
     <div id='visualization'></div>
+    <div>
+        <div class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Schedule</span>
+          </div>
+          <textarea id='schedule' class="form-control" aria-label="Schedule" onchange="client.schedule()">
+* 23:00 17.0
+* 09:00 22.0</textarea>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.10.2/p5.js"></script>
