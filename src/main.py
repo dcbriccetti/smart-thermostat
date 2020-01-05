@@ -4,8 +4,12 @@ from queue import Queue
 from flask import Flask, jsonify, render_template, request, Response
 import json
 import threading
-from rpi.sensor import Sensor
-from rpi.heaterrelay import HeaterRelay
+try:
+    from rpi.sensor import Sensor
+    from rpi.heaterrelay import HeaterRelay
+except ModuleNotFoundError:
+    from mock.sensor import Sensor
+    from mock.heaterrelay import HeaterRelay
 from thermocontroller import ThermoController
 from scheduler import Scheduler
 
