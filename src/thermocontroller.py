@@ -18,6 +18,7 @@ class ThermoController:
         self.desired_temp = desired_temp
         self.outside_temp = None
         self.current_temp = None
+        self.current_temp_collection_time = None
         self.current_humidity = None
         self.previous_temp = None
         self.desired_temp_changed = True
@@ -55,7 +56,9 @@ class ThermoController:
             self.next_outside_weather_read_time = time_now + OUTSIDE_WEATHER_CHECK_INTERVAL_SECS
             ow = outside_weather(self.weather_station)
             if ow:
-                self.outside_temp = ow[0]
+                self.outside_temp_collection_time = ow[0]
+                self.outside_temp = ow[1]
+                print(f'Outside temp {self.outside_temp} from {round((time() - self.outside_temp_collection_time) / 60)} minutes ago')
             else:
                 print('Unable to get outside temperature')
 
@@ -98,6 +101,7 @@ class ThermoController:
         return {
             'time': time(),
             'outside_temp': self.outside_temp,
+            'outside_temp_collection_time': self.outside_temp_collection_time,
             'current_temp': self.current_temp,
             'desired_temp': self.desired_temp,
             'current_humidity': self.current_humidity,

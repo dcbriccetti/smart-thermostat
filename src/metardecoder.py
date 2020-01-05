@@ -1,8 +1,11 @@
-from typing import Tuple
+from time import localtime
+from datetime import datetime, timedelta
+from typing import Tuple, Sequence, Optional, Match
 from requests import request
 from re import match
 
 KILOMETERS_PER_NAUTICAL_MILE = 1.852
+gmt_offset = localtime().tm_gmtoff
 
 # Example METAR response:
 example = '''000
@@ -16,20 +19,41 @@ T01720039
 'METAR KCCR 010553Z AUTO 15004KT 6SM BR CLR 08/06 A3015 RMK AO2 SLP195'
 
 
-def outside_weather(station='KCCR') -> Tuple[float, float]:
-    'Return temperature and wind speed (in SI units)'
+class MatchGroupsRetriever:
+    def __init__(self, match: Optional[Match[str]]):
+        self.match = match
+
+    def get(self, groups: Sequence[int]):
+        return [int(self.match.group(group)) for group in groups]
+
+
+def outside_weather(station='KCCR') -> Tuple[int, float, float]:
+    'Return time, temperature and wind speed (in SI units)'
     response = request('GET', 'https://w1.weather.gov/data/METAR/' + station + '.1.txt')
     if response.status_code == 200:
         for line in response.text.split('\n'):
-            m = match(r'METAR.* \d\d\d(\d\d)KT .* (\d\d)/\d\d', line)
-            if m:
+            if m := match(r'METAR.* (\d\d)(\d\d)(\d\d)Z .*(\d\d)KT .* (\d\d)/\d\d', line):
                 print(line)
-                wind_knots = int(m.group(1))
+                matches = MatchGroupsRetriever(m)
+                day, hour, minute, wind_knots, temperature = matches.get(range(1, 6))
+                print(day, hour, minute, wind_knots, temperature)
                 wind_kph = round(wind_knots * KILOMETERS_PER_NAUTICAL_MILE)
-                temperature = int(m.group(2))
-                return temperature, wind_kph
+                return metar_local_time(day, hour, minute), temperature, wind_kph
+
+
+def metar_local_time(day, hour, minute) -> int:
+    '''
+    >>> metar_local_time(1, 20, 0)
+    datetime.datetime(2020, 1, 1, 12, 0)
+
+    >>> metar_local_time(2, 0, 0)
+    datetime.datetime(2020, 1, 1, 16, 0)
+    '''
+    utc_now = datetime.utcnow()
+    metar_utc = datetime(utc_now.year, utc_now.month, day, hour, minute)
+    return round((metar_utc + timedelta(0, gmt_offset)).timestamp())
 
 
 if __name__ == '__main__':
-    w = outside_weather('KSFO')
-    print(w)
+    import doctest
+    doctest.testmod()

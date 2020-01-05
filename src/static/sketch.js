@@ -33,9 +33,12 @@ function draw() {
         line(x, chartYBase, x, cty);
         stroke('green');
         point(x, dty);
-        stroke('black');
+
+        const oatAgeMins = (rec.time - rec.outside_temp_collection_time) / 60;
+        const lightness = map(min(oatAgeMins, 60), 0, 60, 0, 255);
+        stroke(lightness);
         point(x, oat);
-        strokeWeight(3);
+
         if (rec.heater_is_on) {
             stroke('#9C2A00');
             point(x, 2);
