@@ -21,9 +21,13 @@
             font-weight: bold;
         }
 
-        #schedule {
+        #schedule-group {
             margin-top: 0.7em;
             width: 20em;
+        }
+
+        #schedule {
+            font-family: monospace;
         }
     </style>
 </head>
@@ -42,13 +46,11 @@
     </div>
     <div id='visualization'></div>
     <div>
-        <div class="input-group">
+        <div id='schedule-group' class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">Schedule</span>
           </div>
-          <textarea id='schedule' class="form-control" aria-label="Schedule" onchange="client.schedule()">
-* 23:00 17.0
-* 09:00 22.0</textarea>
+          <textarea id='schedule' class="form-control" aria-label="Schedule" onchange="client.schedule()">{{ schedule }}</textarea>
         </div>
     </div>
 </div>

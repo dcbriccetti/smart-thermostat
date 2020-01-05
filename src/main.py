@@ -25,7 +25,9 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template('index.html', weather_station=WEATHER_STATION)
+    return render_template(
+        'index.html', weather_station=WEATHER_STATION,
+        schedule=scheduler.render())
 
 
 @app.route('/increase_temperature', methods=('POST',))

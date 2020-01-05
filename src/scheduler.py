@@ -36,3 +36,8 @@ class Scheduler:
             self._settings.append((next_setting_time, temperature))
 
         print(self._settings)
+
+    def render(self) -> str:
+        def pad(num: int): return f'0{num}'[-2:]
+        def f(s): return f'* {pad(s[0].hour)}:{pad(s[0].minute)}{s[1]: .1f}'
+        return '\n'.join((f(s) for s in self._settings))
