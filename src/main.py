@@ -7,6 +7,7 @@ import threading
 from rpi.sensor import Sensor
 from rpi.heaterrelay import HeaterRelay
 from thermocontroller import ThermoController
+from scheduler import Scheduler
 
 WEATHER_STATION = 'KCCR'
 TEMP_CHANGE_INCREMENT = 0.1
@@ -14,6 +15,7 @@ DEFAULT_DESIRED_TEMP = 21.0
 BUTTON_REPEAT_DELAY_SECS = 0.3
 
 controller = ThermoController(WEATHER_STATION, Sensor(), HeaterRelay(), DEFAULT_DESIRED_TEMP)
+scheduler = Scheduler(controller)
 app = Flask(__name__)
 
 
@@ -52,10 +54,12 @@ def all_status():
     return jsonify(controller.status_history)
 
 
-def controller_thread():
-    controller.run()
+def _background_thread():
+    while True:
+        scheduler.update()
+        controller.update()
 
 
-threading.Thread(target=controller_thread).start()
+threading.Thread(target=_background_thread).start()
 
 app.run(host='0.0.0.0', threaded=True, debug=True, use_reloader=False)
