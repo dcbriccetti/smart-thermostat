@@ -6,7 +6,7 @@ from sensorfail import SensorReadFailure
 from metardecoder import outside_weather
 
 TEMP_CHECK_INTERVAL_SECS = 30
-OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 15
+OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 5
 HEAT_PSEUDO_TEMP = 23
 
 
