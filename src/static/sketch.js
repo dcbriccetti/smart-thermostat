@@ -23,12 +23,9 @@ function draw() {
     const chartYBase = 8;
 
     const sliceSecs = 15;
-    const elapsed = stateRecords[stateRecords.length - 1].time - stateRecords[0].time;
+    let timeEnd = int(Date.now() / 1000 / sliceSecs) * sliceSecs;
+    const elapsed = timeEnd - stateRecords[0].time;
     const numSlices = min(width - 10, int(elapsed / sliceSecs));
-
-    const secsSinceLastSample = int(Date.now() / 1000 - stateRecords[stateRecords.length - 1].time);
-    const multOfSliceSecsSinceLastSample = int(secsSinceLastSample / sliceSecs);
-    let timeEnd = stateRecords[stateRecords.length - 1].time + multOfSliceSecsSinceLastSample * sliceSecs;
 
     let x = width - 1;
     let iState = stateRecords.length - 1;
@@ -69,9 +66,15 @@ function draw() {
             const dty = scy(avgDTemp);
             const oat = scy(avgOATemp);
 
+            if (timeStart % (60 * 15) === 0) {
+                strokeWeight(1);
+                stroke(0);
+                line(x, chartYBase, x, height);
+            }
+
             strokeWeight(3);
-            stroke('lightblue');
-            line(x, chartYBase, x, cty);
+            stroke('blue');
+            point(x, cty);
 
             stroke('green');
             point(x, dty);
