@@ -1,5 +1,7 @@
 class Client {
   constructor() {
+    this.sliceSecs = 15;
+    document.getElementById('zoom').value = this.sliceSecs;
     fetch('all-status').then(r => r.json()).then(j => addAllStateRecords(j));
     new EventSource('/status').onmessage = event => this.processEvent(JSON.parse(event.data));
   }
@@ -28,7 +30,7 @@ class Client {
   }
 
   zoom() {
-    sliceSecs = Number(document.getElementById('zoom').value)
+    this.sliceSecs = Number(document.getElementById('zoom').value)
   }
 }
 

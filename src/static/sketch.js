@@ -1,5 +1,4 @@
 let stateRecords = [];
-let sliceSecs = 15;
 
 function setup() {
     const vis = $("#visualization");
@@ -7,7 +6,7 @@ function setup() {
 }
 
 function draw() {
-    frameRate(1);
+    frameRate(2);
     background('#e0e0e0');
     translate(0, height);
     scale(1, -1);
@@ -23,9 +22,9 @@ function draw() {
     const temp_max = minOrMax(Math.max, -50);
     const chartYBase = 8;
 
-    let timeEnd = int(Date.now() / 1000 / sliceSecs) * sliceSecs;
+    let timeEnd = int(Date.now() / 1000 / client.sliceSecs) * client.sliceSecs;
     const elapsed = timeEnd - stateRecords[0].time;
-    const numSlices = min(width - 10, int(elapsed / sliceSecs));
+    const numSlices = min(width - 10, int(elapsed / client.sliceSecs));
 
     let x = width - 1;
     let iState = stateRecords.length - 1;
@@ -35,7 +34,7 @@ function draw() {
     }
 
     for (let i = 0; i < numSlices; ++i) {
-        let timeStart = timeEnd - sliceSecs;
+        let timeStart = timeEnd - client.sliceSecs;
         let sumTemps = 0;
         let sumDTemps = 0;
         let sumOATemps = 0;
@@ -90,7 +89,7 @@ function draw() {
         }
 
         --x;
-        timeEnd -= sliceSecs;
+        timeEnd -= client.sliceSecs;
     }
 }
 
