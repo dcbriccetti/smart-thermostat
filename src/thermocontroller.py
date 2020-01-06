@@ -41,7 +41,7 @@ class ThermoController:
             sleep(30)
         sleep(0.1)
 
-    def set_temperature(self, temperature):
+    def set_temperature(self, temperature: float):
         self.desired_temp = temperature
         self.desired_temp_changed = True
 
@@ -54,11 +54,11 @@ class ThermoController:
 
         if time_now >= self.next_outside_weather_read_time:
             self.next_outside_weather_read_time = time_now + OUTSIDE_WEATHER_CHECK_INTERVAL_SECS
-            ow = outside_weather(self.weather_station)
-            if ow:
-                self.outside_temp_collection_time = ow[0]
-                self.outside_temp = ow[1]
-                print(f'Outside temp {self.outside_temp} from {round((time() - self.outside_temp_collection_time) / 60)} minutes ago')
+            if ow := outside_weather(self.weather_station):
+                self.outside_temp_collection_time = ow.local_time
+                self.outside_temp = ow.temperature
+                oat_age = round((time() - self.outside_temp_collection_time) / 60)
+                print(f'Outside temp {self.outside_temp} from {oat_age} minutes ago')
             else:
                 print('Unable to get outside temperature')
 
