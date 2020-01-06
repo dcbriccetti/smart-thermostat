@@ -21,7 +21,7 @@
             font-weight: bold;
         }
 
-        #schedule-group {
+        #schedule-group, #zoom-group {
             margin-top: 0.7em;
             width: 20em;
         }
@@ -46,11 +46,17 @@
     </div>
     <div id='visualization'></div>
     <div>
+        <div id='zoom-group' class="input-group">
+          <div class="input-group-prepend">
+            <span class="input-group-text">Zoom</span>
+          </div>
+          <input id='zoom' class="form-control" aria-label="Zoom" onchange="client.zoom()">{{ schedule }}</input>
+        </div>
         <div id='schedule-group' class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">Schedule</span>
           </div>
-          <textarea id='schedule' class="form-control" aria-label="Schedule" onchange="client.schedule()">{{ schedule }}</textarea>
+          <textarea id='schedule' class="form-control" aria-label="Schedule" rows="5" onchange="client.schedule()">{{ schedule }}</textarea>
         </div>
     </div>
 </div>

@@ -26,6 +26,10 @@ class Client {
       body: document.getElementById('schedule').value
     }).then(response => response);
   }
+
+  zoom() {
+    sliceSecs = Number(document.getElementById('zoom').value)
+  }
 }
 
 const client = new Client();

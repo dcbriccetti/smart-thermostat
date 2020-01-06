@@ -1,4 +1,5 @@
 let stateRecords = [];
+let sliceSecs = 15;
 
 function setup() {
     const vis = $("#visualization");
@@ -22,7 +23,6 @@ function draw() {
     const temp_max = minOrMax(Math.max, -50);
     const chartYBase = 8;
 
-    const sliceSecs = 15;
     let timeEnd = int(Date.now() / 1000 / sliceSecs) * sliceSecs;
     const elapsed = timeEnd - stateRecords[0].time;
     const numSlices = min(width - 10, int(elapsed / sliceSecs));
@@ -67,8 +67,8 @@ function draw() {
             const oat = scy(avgOATemp);
 
             if (timeStart % (60 * 15) === 0) {
-                strokeWeight(1);
-                stroke(0);
+                strokeWeight(timeStart % (60 * 60) === 0 ? 2 : 1);
+                stroke(128);
                 line(x, chartYBase, x, height);
             }
 
