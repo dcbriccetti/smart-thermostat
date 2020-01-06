@@ -67,18 +67,23 @@ function draw() {
 
       const gridLow = floor(temp_min);
       const gridHigh = ceil(temp_max);
+      const smallRange = gridHigh - gridLow < 5;
+
       for (let gt = gridLow; gt < gridHigh; gt++) {
         const gly = scy(gt);
         strokeWeight(1);
         stroke(200);
         line(0, gly, width, gly);
-        push();
-        scale(1, -1);
-        strokeWeight(1);
-        textAlign(RIGHT, CENTER);
-        textStyle(NORMAL);
-        text(gt, width - 3, -gly);
-        pop();
+
+        if (smallRange || gt % 5 === 0) {
+          push();
+          scale(1, -1);
+          strokeWeight(1);
+          textAlign(RIGHT, CENTER);
+          textStyle(NORMAL);
+          text(gt, width - 3, -gly);
+          pop();
+        }
       }
 
       const is15MinMultiple = timeStart % (60 * 15) === 0;
