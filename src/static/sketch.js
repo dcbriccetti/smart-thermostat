@@ -26,7 +26,7 @@ function draw() {
   const elapsed = timeEnd - stateRecords[0].time;
   const numSlices = min(width - 10, int(elapsed / client.sliceSecs));
 
-  let x = width - 1;
+  let x = width - 20;
   let iState = stateRecords.length - 1;
 
   function tempAge(rec) {
@@ -65,6 +65,22 @@ function draw() {
       const dty = scy(avgDTemp);
       const oat = scy(avgOATemp);
 
+      const gridLow = floor(temp_min);
+      const gridHigh = ceil(temp_max);
+      for (let gt = gridLow; gt < gridHigh; gt++) {
+        const gly = scy(gt);
+        strokeWeight(1);
+        stroke(200);
+        line(0, gly, width, gly);
+        push();
+        scale(1, -1);
+        strokeWeight(1);
+        textAlign(RIGHT, CENTER);
+        textStyle(NORMAL);
+        text(gt, width - 3, -gly);
+        pop();
+      }
+
       const is15MinMultiple = timeStart % (60 * 15) === 0;
       const is60MinMultiple = is15MinMultiple && timeStart % (60 * 60) === 0;
 
@@ -78,6 +94,7 @@ function draw() {
         push();
         scale(1, -1);
         textAlign(CENTER, BOTTOM);
+        strokeWeight(0);
         text(new Date(timeStart * 1000).getHours(), x, 0);
         pop();
       }
