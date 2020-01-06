@@ -77,8 +77,8 @@ function draw() {
       if (is60MinMultiple) {
         push();
         scale(1, -1);
-        textAlign(CENTER, CENTER);
-        text(new Date(timeStart * 1000).getHours(), x, -12);
+        textAlign(CENTER, BOTTOM);
+        text(new Date(timeStart * 1000).getHours(), x, 0);
         pop();
       }
 
@@ -95,7 +95,7 @@ function draw() {
 
       if (heatOnInPeriod) {
         stroke('#9C2A00');
-        point(x, 2);
+        point(x, chartYBase - 6);
       }
     }
 
