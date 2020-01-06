@@ -35,8 +35,8 @@ function draw() {
         point(x, dty);
 
         const oatAgeMins = (rec.time - rec.outside_temp_collection_time) / 60;
-        const lightness = map(min(oatAgeMins, 60), 0, 60, 0, 255);
-        stroke(lightness);
+        const opacity = map(min(oatAgeMins, 60), 0, 60, 255, 0);
+        stroke(0, 0, 0, opacity);
         point(x, oat);
 
         if (rec.heater_is_on) {
