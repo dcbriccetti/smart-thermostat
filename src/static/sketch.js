@@ -77,7 +77,8 @@ function draw() {
       if (is60MinMultiple) {
         push();
         scale(1, -1);
-        text(new Date(timeStart * 1000).getHours(), x - 8, -8);
+        textAlign(CENTER, CENTER);
+        text(new Date(timeStart * 1000).getHours(), x, -12);
         pop();
       }
 
