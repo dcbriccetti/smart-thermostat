@@ -7,6 +7,7 @@ class Client {
   }
 
   processEvent(state) {
+    console.log('event arrived');
     addStateRecord(state);
     const el = id => document.getElementById(id);
     el('outside-temperature').textContent = state.outside_temp.toFixed(0);
