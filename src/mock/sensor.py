@@ -1,4 +1,5 @@
-from random import randint
+from math import sin
+from time import monotonic
 
 
 class Sensor:
@@ -8,4 +9,4 @@ class Sensor:
         pass
 
     def read(self):
-        return 50, 20 + randint(0, 15) / 10.0
+        return 50, 18 + sin(monotonic() / 1000) * 5
