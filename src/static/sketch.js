@@ -86,6 +86,7 @@ function draw() {
   for (let i = stateRecords.length - 1; i >= 0; --i) {
     const rec = stateRecords[i];
     const x = timeToX(rec.time);
+    if (x < 0) break;
 
     strokeWeight(3);
     stroke('blue');
