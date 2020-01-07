@@ -65,75 +65,50 @@ function draw() {
   const temp_max = minOrMax(Math.max, -50);
   const chartYBase = 20;
 
-  let timeEnd = int(Date.now() / 1000 / client.sliceSecs) * client.sliceSecs;
-  const elapsed = timeEnd - stateRecords[0].time;
-  const numSlices = min(width - 10, int(elapsed / client.sliceSecs));
+  let timeEnd = int(Date.now() / 1000);
 
-  let x = width - 20;
+  let xRight = width - 20;
   let iState = stateRecords.length - 1;
 
   function tempAge(rec) {
     return (rec.time - rec.outside_temp_collection_time) / 60;
   }
 
-  console.time('drawslices');
-  for (let i = 0; i < numSlices; ++i) {
+  console.time('drawpoints');
+  const tempToY = y => map(y, temp_min, temp_max, chartYBase, height);
+  drawGridLines(temp_min, temp_max, tempToY);
+  for (let i = stateRecords.length - 1; i >= 0; --i) {
+
+    const rec = stateRecords[i];
     let timeStart = timeEnd - client.sliceSecs;
-    let sumTemps = 0;
-    let sumDTemps = 0;
-    let sumOATemps = 0;
-    let sumOATempAges = 0;
-    let numInPeriod = 0;
-    let heatOnInPeriod = false;
+    const timeToX = time => map(time, stateRecords[0].time, timeEnd, 0, xRight);
 
-    while (stateRecords[iState].time <= timeEnd && stateRecords[iState].time > timeStart) {
-      const rec = stateRecords[iState];
-      ++numInPeriod;
-      sumTemps += rec.current_temp;
-      sumDTemps += rec.desired_temp;
-      sumOATemps += rec.outside_temp;
-      sumOATempAges += tempAge(rec);
-      if (rec.heater_is_on)
-        heatOnInPeriod = true;
-      --iState;
+    const cty = tempToY(rec.current_temp);
+    const dty = tempToY(rec.desired_temp);
+    const oat = tempToY(rec.outside_temp);
+
+    const x = timeToX(rec.time);
+
+//      drawXGridLine(timeStart, x, chartYBase);
+
+    strokeWeight(3);
+    stroke('blue');
+    point(x, cty);
+
+    stroke('green');
+    point(x, dty);
+
+    const opacity = map(min(tempAge(rec), 60), 0, 60, 255, 0);
+    stroke(0, 0, 0, 255);
+    point(x, oat);
+
+    if (rec.heater_is_on) {
+      stroke('#9C2A00');
+      point(x, chartYBase - 6);
     }
-
-    const tempToY = y => map(y, temp_min, temp_max, chartYBase, height);
-    drawGridLines(temp_min, temp_max, tempToY);
-
-    if (numInPeriod > 0 || iState > 0) {
-      const prevRec = stateRecords[iState - 1];
-      const avgTemp = numInPeriod > 0 ? sumTemps / numInPeriod : prevRec.current_temp;
-      const avgDTemp = numInPeriod > 0 ? sumDTemps / numInPeriod : prevRec.desired_temp;
-      const avgOATemp = numInPeriod > 0 ? sumOATemps / numInPeriod : prevRec.outside_temp;
-      const avgOATempAges = numInPeriod > 0 ? sumOATempAges / numInPeriod : tempAge(prevRec);
-      const cty = tempToY(avgTemp);
-      const dty = tempToY(avgDTemp);
-      const oat = tempToY(avgOATemp);
-
-      drawXGridLine(timeStart, x, chartYBase);
-
-      strokeWeight(3);
-      stroke('blue');
-      point(x, cty);
-
-      stroke('green');
-      point(x, dty);
-
-      const opacity = map(min(avgOATempAges, 60), 0, 60, 255, 0);
-      stroke(0, 0, 0, opacity);
-      point(x, oat);
-
-      if (heatOnInPeriod) {
-        stroke('#9C2A00');
-        point(x, chartYBase - 6);
-      }
-    }
-
-    --x;
-    timeEnd -= client.sliceSecs;
   }
-  console.timeEnd('drawslices');
+
+  console.timeEnd('drawpoints');
 }
 
 function addStateRecord(state) {
