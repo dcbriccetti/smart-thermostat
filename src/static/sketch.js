@@ -27,13 +27,13 @@ function draw() {
 
   let xRight = width - 20;
 
-  function tempAge(rec) {
-    return (rec.time - rec.outside_temp_collection_time) / 60;
-  }
-
   console.time('drawpoints');
   const tempToY = y => map(y, temp_min, temp_max, chartYBase, height);
-  const timeToX = time => map(time, timeStart, timeEnd, 0, xRight);
+  const timeToX = time => {
+    const secondsFromEnd = timeEnd - time;
+    const pixelsFromEnd = secondsFromEnd / client.sliceSecs;
+    return xRight - pixelsFromEnd;
+  };
 
   function drawVertGridLines() {
     const gridLow = floor(temp_min);
@@ -85,24 +85,18 @@ function draw() {
 
   for (let i = stateRecords.length - 1; i >= 0; --i) {
     const rec = stateRecords[i];
-
-    const cty = tempToY(rec.current_temp);
-    const dty = tempToY(rec.desired_temp);
-
-    const oat = tempToY(rec.outside_temp);
-
     const x = timeToX(rec.time);
 
     strokeWeight(3);
     stroke('blue');
-    point(x, cty);
+    point(x, tempToY(rec.current_temp));
 
     stroke('green');
-    point(x, dty);
+    point(x, tempToY(rec.desired_temp));
 
-    const opacity = map(min(tempAge(rec), 60), 0, 60, 255, 0);
-    stroke(0, 0, 0, 255);
-    point(x, oat);
+    const opacity = map(min((rec.time - rec.outside_temp_collection_time) / 60, 60), 0, 60, 255, 0);
+    stroke(0, 0, 0, opacity);
+    point(x, tempToY(rec.outside_temp));
 
     if (rec.heater_is_on) {
       stroke('#9C2A00');
