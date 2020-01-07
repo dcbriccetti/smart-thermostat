@@ -1,7 +1,6 @@
 from typing import Dict
 from queue import Queue, Full
 from time import monotonic, time, sleep
-from logger import log_state
 from sensorfail import SensorReadFailure
 from metardecoder import outside_weather
 
@@ -84,7 +83,6 @@ class ThermoController:
             state = self.current_state_dict()
             self.status_history.append(state)
             self._enqueue_state_to_all_queues(state)
-            log_state(HEAT_PSEUDO_TEMP, self.current_humidity, self.current_temp, self.desired_temp, heat_state=hs)
 
     def _enqueue_state_to_all_queues(self, state: Dict):
         for state_queue in self.state_queues:
