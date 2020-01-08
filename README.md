@@ -3,7 +3,11 @@ A smart thermostat project, under development.
 
 ## Raspberry Pi Web App Version
 
+### Hardware and Web App on Hand Computer
 ![A picture of the project](rpi-version.jpg)
+
+### Screen Shot from Browser
+![Screen shot from browser](thermostat-partial-day.png)
 
 See the main branch for the code.
 
