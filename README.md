@@ -9,6 +9,9 @@ A smart thermostat project, under development.
 ### Screen Shot from Browser
 ![Screen shot from browser](thermostat-partial-day.png)
 
+### Closer Look at Wiring
+![Wiring](wiring.jpg)
+
 See the main branch for the code.
 
 ## Circuit Python and the Circuit Playground Express Version
