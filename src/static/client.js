@@ -2,11 +2,11 @@ class Client {
   constructor() {
     this.sliceSecs = 15;
     document.getElementById('zoom').value = this.sliceSecs;
-    fetch('all-status').then(r => r.json()).then(j => addAllStateRecords(j));
-    this.setUpEventSource();
+    this.setUpEventProcessing();
   }
 
-  setUpEventSource() {
+  setUpEventProcessing() {
+    fetch('all-status').then(r => r.json()).then(j => addAllStateRecords(j));
     const se = this.eventSource = new EventSource('/status');
     console.log(`Created EventSource. readyState: ${se.readyState}`);
     se.onopen = parm => console.log(parm, se.readyState);
@@ -46,7 +46,7 @@ class Client {
     const rs = this.eventSource.readyState;
     console.log(`vis changed to ${visible}. eventSource.readyState: ${rs}`);
     if (visible && rs === 2 /* closed */) {
-      this.setUpEventSource();
+      this.setUpEventProcessing();
     }
   }
 }
