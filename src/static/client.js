@@ -3,7 +3,11 @@ class Client {
     this.sliceSecs = 15;
     document.getElementById('zoom').value = this.sliceSecs;
     fetch('all-status').then(r => r.json()).then(j => addAllStateRecords(j));
-    new EventSource('/status').onmessage = event => this.processEvent(JSON.parse(event.data));
+    const se = this.eventSource = new EventSource('/status');
+    console.log(se.readyState);
+    se.onopen = parm => console.log(parm, se.readyState);
+    se.onmessage = event => this.processEvent(JSON.parse(event.data));
+    se.onerror = error => console.error('Status events error', error, se.readyState);
   }
 
   processEvent(state) {
@@ -33,6 +37,16 @@ class Client {
   zoom() {
     this.sliceSecs = Number(document.getElementById('zoom').value)
   }
+
+  visibilityChanged(visible) {
+    console.log(`vis changed to ${visible}. eventSource.readyState: ${this.eventSource.readyState}`);
+  }
 }
 
 const client = new Client();
+
+function handleVisibilityChange() {
+  client.visibilityChanged(! document.hidden);
+}
+
+document.addEventListener("visibilitychange", handleVisibilityChange, false);

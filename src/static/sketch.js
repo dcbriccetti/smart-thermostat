@@ -27,7 +27,6 @@ function draw() {
 
   let xRight = width - 20;
 
-  console.time('drawpoints');
   const tempToY = y => map(y, temp_min, temp_max, chartYBase, height);
   const timeToX = time => {
     const secondsFromEnd = timeEnd - time;
@@ -104,8 +103,6 @@ function draw() {
       point(x, chartYBase - 6);
     }
   }
-
-  console.timeEnd('drawpoints');
 }
 
 function addStateRecord(state) {
