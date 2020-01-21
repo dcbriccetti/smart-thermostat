@@ -9,7 +9,7 @@ OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 5
 
 
 class ThermoController:
-    def __init__(self, weather_station, sensor, heater, fan, desired_temp):
+    def __init__(self, weather_station: str, sensor, heater, fan, desired_temp: float):
         self.weather_station = weather_station
         self.sensor = sensor
         self.heater = heater

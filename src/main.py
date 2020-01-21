@@ -6,12 +6,14 @@ import json
 import threading
 try:
     from rpi.sensor import Sensor
-    from rpi.heaterrelay import HeaterRelay
-    from rpi.fanrelay import FanRelay
+    from rpi.relay import Relay
+    import board
+    HEAT_PIN = board.D21
+    FAN_PIN  = board.D16
 except ModuleNotFoundError:
     from mock.sensor import Sensor
-    from mock.heaterrelay import HeaterRelay
-    from mock.fanrelay import FanRelay
+    from mock.relay import Relay
+    HEAT_PIN = FAN_PIN = None
 from thermocontroller import ThermoController
 from scheduler import Scheduler
 
@@ -20,7 +22,7 @@ TEMP_CHANGE_INCREMENT = 0.1
 DEFAULT_DESIRED_TEMP = 21.0
 BUTTON_REPEAT_DELAY_SECS = 0.3
 
-controller = ThermoController(WEATHER_STATION, Sensor(), HeaterRelay(), FanRelay(), DEFAULT_DESIRED_TEMP)
+controller = ThermoController(WEATHER_STATION, Sensor(), heater=Relay('Heat', HEAT_PIN), fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
 scheduler = Scheduler(controller)
 app = Flask(__name__)
 
@@ -46,7 +48,7 @@ def set_temperature():
 
 @app.route('/activate_fan', methods=('PUT',))
 def activate_fan():
-    controller.activate_fan(bool(request.get_data()))
+    controller.activate_fan(request.get_data() == b'true')
     return ''
 
 
