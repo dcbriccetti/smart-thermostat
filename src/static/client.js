@@ -31,6 +31,13 @@ class Client {
     }).then(response => response);
   }
 
+  activateFan(activate) {
+    fetch('activate_fan', {
+      method: 'PUT',
+      body: activate
+    }).then(response => response);
+  }
+
   schedule() {
     fetch('schedule', {
       method: 'PUT',

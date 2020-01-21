@@ -9,10 +9,11 @@ OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 5
 
 
 class ThermoController:
-    def __init__(self, weather_station, sensor, heater, desired_temp):
+    def __init__(self, weather_station, sensor, heater, fan, desired_temp):
         self.weather_station = weather_station
         self.sensor = sensor
         self.heater = heater
+        self.fan = fan
         self.desired_temp = desired_temp
         self.outside_temp = None
         self.current_temp = None
@@ -46,6 +47,9 @@ class ThermoController:
     def increase_temperature(self, amount: float):
         if amount:
             self.set_temperature(self.desired_temp + amount)
+
+    def activate_fan(self, activate: bool):
+        self.fan.enable(activate)
 
     def _update(self):
         time_now = monotonic()
