@@ -32,19 +32,23 @@ class MatchGroupsRetriever:
         return [int(self.match.group(group)) for group in groups]
 
 
-def outside_weather(station='KCCR') -> WeatherMeas:
+def outside_weather(station='KCCR') -> Optional[WeatherMeas]:
     'Return time, temperature and wind speed (in SI units)'
-    response = request('GET', 'https://w1.weather.gov/data/METAR/' + station + '.1.txt')
-    if response.status_code == 200:
-        for line in response.text.split('\n'):
-            if m := match(r'METAR.* (\d\d)(\d\d)(\d\d)Z .* (\d\d)/\d\d', line):
-                print(line)
-                matches = MatchGroupsRetriever(m)
-                day, hour, minute, temperature = matches.get(range(1, 5))
-                return WeatherMeas(metar_local_time(day, hour, minute), temperature)
-        print('No METAR found in', response.text)
-    else:
-        print(response.status_code, response.text)
+    try:
+        response = request('GET', 'https://w1.weather.gov/data/METAR/' + station + '.1.txt')
+        if response.status_code == 200:
+            for line in response.text.split('\n'):
+                if m := match(r'METAR.* (\d\d)(\d\d)(\d\d)Z .* (\d\d)/\d\d', line):
+                    print(line)
+                    matches = MatchGroupsRetriever(m)
+                    day, hour, minute, temperature = matches.get(range(1, 5))
+                    return WeatherMeas(metar_local_time(day, hour, minute), temperature)
+            print('No METAR found in', response.text)
+        else:
+            print(response.status_code, response.text)
+    except Exception as e:
+        print(e)
+        return None
 
 
 def metar_local_time(day, hour, minute) -> int:
