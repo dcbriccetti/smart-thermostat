@@ -62,6 +62,7 @@ class ThermoController:
                 oat_age = round((time() - self.outside_temp_collection_time) / 60)
                 print(f'Outside temp {self.outside_temp} from {oat_age} minutes ago')
             else:
+                self.outside_temp_collection_time = self.outside_temp = None
                 print('Unable to get outside temperature')
 
         if time_now >= self.next_temp_read_time:
