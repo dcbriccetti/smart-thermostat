@@ -38,7 +38,7 @@ def outside_weather(station='KCCR') -> Optional[WeatherMeas]:
         response = request('GET', 'https://w1.weather.gov/data/METAR/' + station + '.1.txt')
         if response.status_code == 200:
             for line in response.text.split('\n'):
-                if m := match(r'METAR.* (\d\d)(\d\d)(\d\d)Z .* (\d\d)/\d\d', line):
+                if m := match(r'METAR.* (\d\d)(\d\d)(\d\d)Z .* M?(\d\d)/M?\d\d', line):
                     print(line)
                     matches = MatchGroupsRetriever(m)
                     day, hour, minute, temperature = matches.get(range(1, 5))
