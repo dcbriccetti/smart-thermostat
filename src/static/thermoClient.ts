@@ -11,7 +11,7 @@ interface State {
 }
 
 class ThermoClient {
-  private sliceSecs: number;
+  public sliceSecs: number;
   private eventSource: EventSource;
 
   constructor(private sketch: Sketch) {
