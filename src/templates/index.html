@@ -39,11 +39,11 @@
             id="outside-temperature"></span> °C at {{ weather_station }}
     </div>
     <div class="large-display"><span id="display-desired"></span> °C
-        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(1)"><span class="big-arrow">↑</span> 1 °</button>
-        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-1)"><span class="big-arrow">↓</span> 1 °</button>
-        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(0.1)">↑ 0.1 °</button>
-        <button type="button" class="btn btn-primary" onclick="client.adjustTemp(-0.1)">↓ 0.1 °</button>
-        <input id='fan' type="checkbox" class="btn btn-primary" onclick="client.activateFan($('#fan').is(':checked'))"/><label for='fan'>Fan</label>
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(1)"><span class="big-arrow">↑</span> 1 °</button>
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-1)"><span class="big-arrow">↓</span> 1 °</button>
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(0.1)">↑ 0.1 °</button>
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-0.1)">↓ 0.1 °</button>
+        <input id='fan' type="checkbox" class="btn btn-primary" onclick="thermoClient.activateFan($('#fan').is(':checked'))"/><label for='fan'>Fan</label>
     </div>
     <div id='visualization'></div>
     <div>
@@ -51,13 +51,13 @@
           <div class="input-group-prepend">
             <span class="input-group-text">Zoom</span>
           </div>
-            <input type=number id='zoom' class="form-control" aria-label="Zoom" onchange="client.zoom()"/>
+            <input type=number id='zoom' class="form-control" aria-label="Zoom" onchange="thermoClient.zoom()"/>
         </div>
         <div id='schedule-group' class="input-group">
           <div class="input-group-prepend">
             <span class="input-group-text">Schedule</span>
           </div>
-          <textarea id='schedule' class="form-control" aria-label="Schedule" rows="5" onchange="client.schedule()">{{ schedule }}</textarea>
+          <textarea id='schedule' class="form-control" aria-label="Schedule" rows="5" onchange="thermoClient.schedule()">{{ schedule }}</textarea>
         </div>
     </div>
 </div>
@@ -66,7 +66,7 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
-<script src="static/client.js"></script>
+<script src="static/thermoClient.js"></script>
 <script src="static/sketch.js"></script>
 </body>
 </html>
