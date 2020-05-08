@@ -9,7 +9,7 @@ try:
     from rpi.relay import Relay
     import board
     HEAT_PIN = board.D21
-    FAN_PIN  = board.D12
+    FAN_PIN  = board.D16
     COOL_PIN  = board.D12
 except ModuleNotFoundError:
     from mock.sensor import Sensor
@@ -23,7 +23,9 @@ TEMP_CHANGE_INCREMENT = 0.1
 DEFAULT_DESIRED_TEMP = 21.0
 BUTTON_REPEAT_DELAY_SECS = 0.3
 
-controller = ThermoController(WEATHER_STATION, Sensor(), heater=Relay('Heat', HEAT_PIN), fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
+controller = ThermoController(WEATHER_STATION, Sensor(),
+    heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
+    fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
 scheduler = Scheduler(controller)
 app = Flask(__name__)
 
@@ -50,6 +52,12 @@ def set_temperature():
 @app.route('/activate_fan', methods=('PUT',))
 def activate_fan():
     controller.activate_fan(request.get_data() == b'true')
+    return ''
+
+
+@app.route('/enable_cool', methods=('PUT',))
+def enable_cool():
+    controller.enable_cool(request.get_data() == b'true')
     return ''
 
 

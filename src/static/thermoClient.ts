@@ -56,6 +56,13 @@ class ThermoClient {
     }).then(response => response)
   }
 
+  enableCool(enable: string) {
+    fetch('enable_cool', {
+      method: 'PUT',
+      body: enable
+    }).then(response => response)
+  }
+
   schedule() {
     fetch('schedule', {
       method: 'PUT',

@@ -44,6 +44,7 @@
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(0.1)">↑ 0.1 °</button>
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-0.1)">↓ 0.1 °</button>
         <input id='fan' type="checkbox" class="btn btn-primary" onclick="thermoClient.activateFan($('#fan').is(':checked'))"/><label for='fan'>Fan</label>
+        <input id='cool' type="checkbox" class="btn btn-primary" onclick="thermoClient.enableCool($('#cool').is(':checked'))"/><label for='cool'>Cool</label>
     </div>
     <div id='visualization'></div>
     <div>
