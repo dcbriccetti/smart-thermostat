@@ -1,3 +1,6 @@
+///<reference path="thermoClient.ts"/>
+declare const p5;
+
 const thermoSketch = new p5(p => {
 
   let stateRecords = [];
