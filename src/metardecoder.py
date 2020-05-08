@@ -1,8 +1,9 @@
-from time import localtime
 from datetime import datetime, timedelta
-from typing import Tuple, Sequence, Optional, Match, NamedTuple
-from requests import request
 from re import match
+from time import localtime
+from typing import Sequence, Optional, Match, NamedTuple
+
+from requests import request
 
 KILOMETERS_PER_NAUTICAL_MILE = 1.852
 gmt_offset = localtime().tm_gmtoff
