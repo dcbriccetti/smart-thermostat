@@ -23,8 +23,9 @@ const thermoSketch = new p5(p => {
       return stateRecords.reduce(rf, iv)
     }
 
-    const temp_min = minOrMax(Math.min, 50)
-    const temp_max = minOrMax(Math.max, -50)
+    const y_axis_margin_degrees = 1
+    const temp_min = minOrMax(Math.min,  50) - y_axis_margin_degrees
+    const temp_max = minOrMax(Math.max, -50) + y_axis_margin_degrees
     const chartYBase = 20
 
     let timeStart = stateRecords[0].time
@@ -92,16 +93,28 @@ const thermoSketch = new p5(p => {
       const x = timeToX(rec.time)
       if (x < 0) break
 
+      const prevRec = i >= 1 ? stateRecords[i - 1] : null
+      const prevX = prevRec ? timeToX(prevRec.time) : null
+
       p.strokeWeight(3)
       p.stroke('blue')
+      if (prevRec) {
+        const prevTempY = tempToY(prevRec.current_temp);
+        p.line(x, prevTempY, prevX, prevTempY)
+      }
       p.point(x, tempToY(rec.current_temp))
 
       p.stroke('green')
-      p.point(x, tempToY(rec.desired_temp))
+      const desiredTempY = tempToY(rec.desired_temp);
+      if (prevRec && prevRec.desired_temp === rec.desired_temp) {
+        const prevX = timeToX(prevRec.time)
+        p.line(x, desiredTempY, prevX, desiredTempY)
+      } else p.point(x, desiredTempY)
 
-      const opacity = p.map(p.min((rec.time - rec.outside_temp_collection_time) / 60, 60), 0, 60, 255, 0)
-      p.stroke(0, 0, 0, opacity)
-      p.point(x, tempToY(rec.outside_temp))
+      p.strokeWeight(10)
+      p.stroke(255, 190, 0)
+      p.point(timeToX(rec.outside_temp_collection_time), tempToY(rec.outside_temp))
+      p.strokeWeight(3)
 
       if (rec.heater_is_on) {
         p.stroke('#9C2A00')
