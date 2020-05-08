@@ -9,11 +9,12 @@ try:
     from rpi.relay import Relay
     import board
     HEAT_PIN = board.D21
-    FAN_PIN  = board.D16
+    FAN_PIN  = board.D12
+    COOL_PIN  = board.D12
 except ModuleNotFoundError:
     from mock.sensor import Sensor
     from mock.relay import Relay
-    HEAT_PIN = FAN_PIN = None
+    HEAT_PIN = FAN_PIN = COOL_PIN = None
 from thermocontroller import ThermoController
 from scheduler import Scheduler
 
