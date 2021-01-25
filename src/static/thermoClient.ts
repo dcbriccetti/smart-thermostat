@@ -7,6 +7,8 @@ interface State {
   current_temp: number
   desired_temp: number
   outside_temp: number
+  wind_dir: number
+  wind_speed: number
   current_humidity: number
 }
 
@@ -36,7 +38,9 @@ class ThermoClient {
     console.log('event arrived')
     this.sketch.addStateRecord(state)
     const el = id => document.getElementById(id)
-    el('outside-temperature').textContent = state.outside_temp.toFixed(0)
+    el('outside-temperature').textContent = state.outside_temp.toFixed(1)
+    el('wind-dir').textContent = state.wind_dir.toFixed(0)
+    el('wind-speed').textContent = state.wind_speed.toFixed(0)
     el('temperature').textContent = state.current_temp.toFixed(1)
     el('humidity').textContent = state.current_humidity.toFixed(0)
     el('display-desired').textContent = state.desired_temp.toFixed(1)

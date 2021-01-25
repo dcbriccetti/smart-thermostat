@@ -18,12 +18,12 @@ except ModuleNotFoundError:
 from thermocontroller import ThermoController
 from scheduler import Scheduler
 
-WEATHER_STATION = 'KCCR'
+WEATHER_QUERY = 'zip=94549'
 TEMP_CHANGE_INCREMENT = 0.1
 DEFAULT_DESIRED_TEMP = 21.0
 BUTTON_REPEAT_DELAY_SECS = 0.3
 
-controller = ThermoController(WEATHER_STATION, Sensor(),
+controller = ThermoController(WEATHER_QUERY, Sensor(),
     heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
     fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
 scheduler = Scheduler(controller)
@@ -33,7 +33,7 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template(
-        'index.html', weather_station=WEATHER_STATION,
+        'index.html', weather_query=WEATHER_QUERY.split('=')[1],
         schedule=scheduler.render())
 
 

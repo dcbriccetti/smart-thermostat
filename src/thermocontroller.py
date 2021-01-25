@@ -2,15 +2,15 @@ from typing import Dict
 from queue import Queue, Full
 from time import monotonic, time, sleep
 from sensorfail import SensorReadFailure
-from metardecoder import outside_weather
+from outside_weather import outside_weather
 
 TEMP_CHECK_INTERVAL_SECS = 30
 OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 5
 
 
 class ThermoController:
-    def __init__(self, weather_station: str, sensor, heater, cooler, fan, desired_temp: float):
-        self.weather_station = weather_station
+    def __init__(self, weather_query: str, sensor, heater, cooler, fan, desired_temp: float):
+        self.weather_query = weather_query
         self.sensor = sensor
         self.heater = heater
         self.cooler = cooler
@@ -97,9 +97,11 @@ class ThermoController:
     def _manage_outside_weather(self, time_now):
         if time_now >= self.next_outside_weather_read_time:
             self.next_outside_weather_read_time = time_now + OUTSIDE_WEATHER_CHECK_INTERVAL_SECS
-            if ow := outside_weather(self.weather_station):
+            if ow := outside_weather(self.weather_query):
                 self.outside_temp_collection_time = ow.local_time
                 self.outside_temp = ow.temperature
+                self.wind_dir = ow.wind_dir
+                self.wind_speed = ow.wind_speed
                 oat_age = round((time() - self.outside_temp_collection_time) / 60)
                 print(f'Outside temp {self.outside_temp} from {oat_age} minutes ago')
             else:
@@ -121,6 +123,8 @@ class ThermoController:
             'time': time(),
             'outside_temp': self.outside_temp,
             'outside_temp_collection_time': self.outside_temp_collection_time,
+            'wind_dir': self.wind_dir,
+            'wind_speed': self.wind_speed,
             'current_temp': self.current_temp,
             'desired_temp': self.desired_temp,
             'current_humidity': self.current_humidity,
