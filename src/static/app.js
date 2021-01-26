@@ -20,7 +20,7 @@ class ThermoClient {
         console.log('event arrived');
         this.sketch.addStateRecord(state);
         const el = id => document.getElementById(id);
-        el('outside-temperature').textContent = state.outside_temp.toFixed(1);
+        el('outside-temperature').textContent = state.outside_temp.toFixed(2);
         el('wind-dir').textContent = state.wind_dir.toFixed(0);
         el('wind-speed').textContent = state.wind_speed.toFixed(0);
         el('gust').textContent = state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`;
