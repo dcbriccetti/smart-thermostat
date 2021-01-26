@@ -34,7 +34,8 @@ const thermoSketch = new p5(p => {
     let xRight = p.width - 20
 
     const tempToY = y => p.map(y, temp_min, temp_max, chartYBase, p.height)
-    const timeToX = time => {
+
+    function timeToX(time) {
       const secondsFromEnd = timeEnd - time
       const pixelsFromEnd = secondsFromEnd / thermoClient.sliceSecs
       return xRight - pixelsFromEnd
@@ -123,14 +124,8 @@ const thermoSketch = new p5(p => {
     }
   }
 
-  p.addStateRecord = (state) => {
-    stateRecords.push(state)
-  }
-
-  p.addAllStateRecords = (records) => {
-    stateRecords = records
-  }
-
+  p.addStateRecord = record => stateRecords.push(record)
+  p.addAllStateRecords = records => stateRecords = records
 })
 
 const thermoClient = new ThermoClient(thermoSketch)

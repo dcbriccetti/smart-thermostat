@@ -10,26 +10,33 @@ class ThermoClient {
     }
     setUpEventProcessing() {
         fetch('all-status').then(r => r.json()).then(j => this.sketch.addAllStateRecords(j));
-        const se = this.eventSource = new EventSource('/status');
-        console.log(`Created EventSource. readyState: ${se.readyState}`);
-        se.onopen = parm => console.log(parm, se.readyState);
-        se.onmessage = event => this.processEvent(JSON.parse(event.data));
-        se.onerror = error => console.error('Status events error', error, se.readyState);
+        const source = this.eventSource = new EventSource('/status');
+        console.log(`Created EventSource. readyState: ${source.readyState}`);
+        source.onopen = parm => console.log(parm, source.readyState);
+        source.onmessage = event => this.processEvent(JSON.parse(event.data));
+        source.onerror = error => console.error('Status events error', error, source.readyState);
     }
     processEvent(state) {
         console.log('event arrived');
         this.sketch.addStateRecord(state);
-        const el = id => document.getElementById(id);
-        el('outside-temperature').textContent = state.outside_temp.toFixed(2);
-        el('wind-dir').textContent = state.wind_dir.toFixed(0);
-        el('wind-speed').textContent = state.wind_speed.toFixed(0);
-        el('gust').textContent = state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`;
-        el('temperature').textContent = state.current_temp.toFixed(1);
-        el('pressure').textContent = state.pressure.toFixed(0);
-        el('humidity').textContent = state.humidity.toFixed(0);
-        el('outside-humidity').textContent = state.outside_humidity.toFixed(0);
-        el('main-weather').textContent = state.main_weather;
-        el('display-desired').textContent = state.desired_temp.toFixed(1);
+        const set = (id, text) => document.getElementById(id).textContent = text;
+        set('outside-temperature', state.outside_temp.toFixed(2));
+        set('wind-dir', state.wind_dir.toFixed(0));
+        set('wind-speed', state.wind_speed.toFixed(0));
+        set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`);
+        set('temperature', state.current_temp.toFixed(1));
+        set('pressure', state.pressure.toFixed(0));
+        set('humidity', state.humidity.toFixed(0));
+        set('outside-humidity', state.outside_humidity.toFixed(0));
+        set('display-desired', state.desired_temp.toFixed(1));
+        const mwElem = document.getElementById('main-weather');
+        mwElem.innerHTML = '';
+        state.main_weather.forEach(mw => {
+            const img = document.createElement('img');
+            img.src = `http://openweathermap.org/img/wn/${mw.icon}.png`;
+            img.alt = img.title = mw.description;
+            mwElem.appendChild(img);
+        });
     }
     adjustTemp(amount) {
         fetch('increase_temperature', {
@@ -95,11 +102,11 @@ const thermoSketch = new p5(p => {
         let timeEnd = p.int(Date.now() / 1000);
         let xRight = p.width - 20;
         const tempToY = y => p.map(y, temp_min, temp_max, chartYBase, p.height);
-        const timeToX = time => {
+        function timeToX(time) {
             const secondsFromEnd = timeEnd - time;
             const pixelsFromEnd = secondsFromEnd / thermoClient.sliceSecs;
             return xRight - pixelsFromEnd;
-        };
+        }
         function drawVertGridLines() {
             const gridLow = Math.floor(temp_min);
             const gridHigh = Math.ceil(temp_max);
@@ -174,12 +181,8 @@ const thermoSketch = new p5(p => {
             }
         }
     };
-    p.addStateRecord = (state) => {
-        stateRecords.push(state);
-    };
-    p.addAllStateRecords = (records) => {
-        stateRecords = records;
-    };
+    p.addStateRecord = record => stateRecords.push(record);
+    p.addAllStateRecords = records => stateRecords = records;
 });
 const thermoClient = new ThermoClient(thermoSketch);
 //# sourceMappingURL=app.js.map

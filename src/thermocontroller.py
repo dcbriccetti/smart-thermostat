@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List, Any
 from queue import Queue, Full
 from time import monotonic, time, sleep
 from sensorfail import SensorReadFailure
@@ -9,6 +9,8 @@ OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60
 
 
 class ThermoController:
+    state_queues: List[Queue]
+
     def __init__(self, weather_query: str, sensor, heater, cooler, fan, desired_temp: float):
         self.weather_query = weather_query
         self.sensor = sensor
@@ -128,7 +130,7 @@ class ThermoController:
         except Full:
             pass
 
-    def current_state_dict(self) -> Dict[str, str]:
+    def current_state_dict(self) -> Dict[str, Any]:
         return {
             'time': time(),
             'outside_temp': self.outside_temp,

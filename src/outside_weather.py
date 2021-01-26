@@ -1,8 +1,9 @@
 import os
 from time import time
-from typing import Optional, NamedTuple
+from typing import Optional, NamedTuple, Dict, List
 
 import requests
+from requests.models import Response
 
 key = os.environ['OPEN_WEATHER_MAP_KEY']
 
@@ -15,16 +16,17 @@ class WeatherMeas(NamedTuple):
     wind_dir: int
     pressure: float
     humidity: int
-    main_weather: str
+    main_weather: List[Dict[str, str]]
 
 
 def outside_weather(weather_query='q=Oakland') -> Optional[WeatherMeas]:
     url = f'http://api.openweathermap.org/data/2.5/weather?{weather_query}&units=metric&APPID={key}'
-    response = requests.get(url)
+    response: Response = requests.get(url)
     if response.status_code == 200:
         json: dict = response.json()
-        main = json['main']
-        wind = json['wind']
+        print(json)
+        main: dict = json['main']
+        wind: dict = json['wind']
         return WeatherMeas(
             int(time()),
             float(main['temp']),
@@ -33,7 +35,7 @@ def outside_weather(weather_query='q=Oakland') -> Optional[WeatherMeas]:
             int(wind['deg']),
             float(main['pressure']),
             int(main['humidity']),
-            ', '.join((w['main'] for w in json['weather'])),
+            json['weather'],
         )
     else:
         print(response.status_code, response.text)
