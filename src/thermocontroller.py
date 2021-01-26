@@ -5,7 +5,7 @@ from sensorfail import SensorReadFailure
 from outside_weather import outside_weather
 
 TEMP_CHECK_INTERVAL_SECS = 30
-OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60 * 5
+OUTSIDE_WEATHER_CHECK_INTERVAL_SECS = 60
 
 
 class ThermoController:
