@@ -111,7 +111,7 @@ const thermoSketch = new p5(p => {
         p.line(x, desiredTempY, prevX, desiredTempY)
       } else p.point(x, desiredTempY)
 
-      p.strokeWeight(10)
+      p.strokeWeight(6)
       p.stroke(255, 190, 0)
       p.point(timeToX(rec.outside_temp_collection_time), tempToY(rec.outside_temp))
       p.strokeWeight(3)
