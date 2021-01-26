@@ -24,7 +24,10 @@ class ThermoClient {
         el('wind-dir').textContent = state.wind_dir.toFixed(0);
         el('wind-speed').textContent = state.wind_speed.toFixed(0);
         el('temperature').textContent = state.current_temp.toFixed(1);
-        el('humidity').textContent = state.current_humidity.toFixed(0);
+        el('pressure').textContent = state.pressure.toFixed(0);
+        el('humidity').textContent = state.humidity.toFixed(0);
+        el('outside-humidity').textContent = state.outside_humidity.toFixed(0);
+        el('main-weather').textContent = state.main_weather;
         el('display-desired').textContent = state.desired_temp.toFixed(1);
     }
     adjustTemp(amount) {

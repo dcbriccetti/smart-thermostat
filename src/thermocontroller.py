@@ -20,7 +20,12 @@ class ThermoController:
         self.outside_temp = None
         self.current_temp = None
         self.current_temp_collection_time = None
-        self.current_humidity = None
+        self.humidity = None
+        self.outside_humidity = None
+        self.wind_dir = None
+        self.wind_speed = None
+        self.pressure = None
+        self.main_weather = None
         self.previous_temp = None
         self.desired_temp_changed = True
         self.hac_is_on = False
@@ -71,7 +76,7 @@ class ThermoController:
             if self.shutoff and self.shutoff.beyond_suppression_period():
                 self.shutoff = None
 
-            self.current_humidity, self.current_temp = self.sensor.read()
+            self.humidity, self.current_temp = self.sensor.read()
             self._change_hac_state(False)
 
         degrees_of_change_needed = \
@@ -102,6 +107,9 @@ class ThermoController:
                 self.outside_temp = ow.temperature
                 self.wind_dir = ow.wind_dir
                 self.wind_speed = ow.wind_speed
+                self.pressure = ow.pressure
+                self.outside_humidity = ow.humidity
+                self.main_weather = ow.main_weather
                 oat_age = round((time() - self.outside_temp_collection_time) / 60)
                 print(f'Outside temp {self.outside_temp} from {oat_age} minutes ago')
             else:
@@ -127,7 +135,10 @@ class ThermoController:
             'wind_speed': self.wind_speed,
             'current_temp': self.current_temp,
             'desired_temp': self.desired_temp,
-            'current_humidity': self.current_humidity,
+            'humidity': self.humidity,
+            'outside_humidity': self.outside_humidity,
+            'pressure': self.pressure,
+            'main_weather': self.main_weather,
             'heater_is_on': self.hac_is_on}
 
     def _change_hac_state(self, should_be_on: bool):

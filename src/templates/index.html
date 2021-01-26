@@ -35,12 +35,12 @@
 
 <div class="container-fluid">
     <h2>Smart Thermostat</h2>
-    <div class="large-display">Inside: <span id="temperature"></span> °C, <span id="humidity"></span>% humidity</div>
     <div class="large-display">
-        {{ weather_query }}: <span id="outside-temperature"></span> °C,
-        wind <span id="wind-dir"></span>° at <span id="wind-speed"></span>
+        {{ weather_query }}: <span id="main-weather"></span>, <span id="outside-temperature"></span> °C,
+        <span id="pressure"></span> hPa, <span id="outside-humidity"></span>%, Wind <span id="wind-dir"></span>° at <span id="wind-speed"></span> m/s
     </div>
-    <div class="large-display"><span id="display-desired"></span> °C
+    <div class="large-display">Inside: <span id="temperature"></span> °C, <span id="humidity"></span>% humidity</div>
+    <div class="large-display">Desired: <span id="display-desired"></span> °C
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(1)"><span class="big-arrow">↑</span> 1 °</button>
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-1)"><span class="big-arrow">↓</span> 1 °</button>
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(0.1)">↑ 0.1 °</button>

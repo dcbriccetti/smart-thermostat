@@ -4,12 +4,15 @@ interface Sketch {
 }
 
 interface State {
-  current_temp: number
-  desired_temp: number
-  outside_temp: number
-  wind_dir: number
-  wind_speed: number
-  current_humidity: number
+  current_temp:     number
+  desired_temp:     number
+  outside_temp:     number
+  wind_dir:         number
+  wind_speed:       number
+  pressure:         number
+  main_weather:     string
+  humidity:         number
+  outside_humidity: number
 }
 
 class ThermoClient {
@@ -39,11 +42,14 @@ class ThermoClient {
     this.sketch.addStateRecord(state)
     const el = id => document.getElementById(id)
     el('outside-temperature').textContent = state.outside_temp.toFixed(1)
-    el('wind-dir').textContent = state.wind_dir.toFixed(0)
-    el('wind-speed').textContent = state.wind_speed.toFixed(0)
-    el('temperature').textContent = state.current_temp.toFixed(1)
-    el('humidity').textContent = state.current_humidity.toFixed(0)
-    el('display-desired').textContent = state.desired_temp.toFixed(1)
+    el('wind-dir')           .textContent = state.wind_dir.toFixed(0)
+    el('wind-speed')         .textContent = state.wind_speed.toFixed(0)
+    el('temperature')        .textContent = state.current_temp.toFixed(1)
+    el('pressure')           .textContent = state.pressure.toFixed(0)
+    el('humidity')           .textContent = state.humidity.toFixed(0)
+    el('outside-humidity')   .textContent = state.outside_humidity.toFixed(0)
+    el('main-weather')       .textContent = state.main_weather
+    el('display-desired')    .textContent = state.desired_temp.toFixed(1)
   }
 
   adjustTemp(amount: number) {
