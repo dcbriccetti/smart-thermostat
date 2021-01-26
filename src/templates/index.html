@@ -13,7 +13,7 @@
         }
 
         .large-display {
-            font-size: 200%;
+            font-size: 150%;
         }
 
         .big-arrow {
@@ -37,7 +37,8 @@
     <h2>Smart Thermostat</h2>
     <div class="large-display">
         {{ weather_query }}: <span id="main-weather"></span>, <span id="outside-temperature"></span> °C,
-        <span id="pressure"></span> hPa, <span id="outside-humidity"></span>%, Wind <span id="wind-dir"></span>° at <span id="wind-speed"></span> m/s
+        <span id="pressure"></span> hPa, <span id="outside-humidity"></span>%,
+        Wind <span id="wind-dir"></span>° at <span id="wind-speed"></span><span id="gust"></span> k/h
     </div>
     <div class="large-display">Inside: <span id="temperature"></span> °C, <span id="humidity"></span>% humidity</div>
     <div class="large-display">Desired: <span id="display-desired"></span> °C

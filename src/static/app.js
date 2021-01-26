@@ -23,6 +23,7 @@ class ThermoClient {
         el('outside-temperature').textContent = state.outside_temp.toFixed(1);
         el('wind-dir').textContent = state.wind_dir.toFixed(0);
         el('wind-speed').textContent = state.wind_speed.toFixed(0);
+        el('gust').textContent = state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`;
         el('temperature').textContent = state.current_temp.toFixed(1);
         el('pressure').textContent = state.pressure.toFixed(0);
         el('humidity').textContent = state.humidity.toFixed(0);

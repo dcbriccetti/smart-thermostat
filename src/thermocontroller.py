@@ -24,6 +24,7 @@ class ThermoController:
         self.outside_humidity = None
         self.wind_dir = None
         self.wind_speed = None
+        self.gust = None
         self.pressure = None
         self.main_weather = None
         self.previous_temp = None
@@ -107,6 +108,7 @@ class ThermoController:
                 self.outside_temp = ow.temperature
                 self.wind_dir = ow.wind_dir
                 self.wind_speed = ow.wind_speed
+                self.gust = ow.gust
                 self.pressure = ow.pressure
                 self.outside_humidity = ow.humidity
                 self.main_weather = ow.main_weather
@@ -133,6 +135,7 @@ class ThermoController:
             'outside_temp_collection_time': self.outside_temp_collection_time,
             'wind_dir': self.wind_dir,
             'wind_speed': self.wind_speed,
+            'gust': self.gust,
             'current_temp': self.current_temp,
             'desired_temp': self.desired_temp,
             'humidity': self.humidity,
