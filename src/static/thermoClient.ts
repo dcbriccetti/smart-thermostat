@@ -4,7 +4,7 @@ interface Sketch {
 }
 
 interface State {
-  current_temp:     number
+  inside_temp:      number
   desired_temp:     number
   outside_temp:     number
   wind_dir:         number
@@ -15,7 +15,7 @@ interface State {
     icon: string
     description: string
   }]
-  humidity:         number
+  inside_humidity:  number
   outside_humidity: number
 }
 
@@ -36,27 +36,29 @@ class ThermoClient {
     fetch('all-status').then(r => r.json()).then(j => this.sketch.addAllStateRecords(j))
     const source = this.eventSource = new EventSource('/status')
     console.log(`Created EventSource. readyState: ${source.readyState}`)
-    source.onopen = parm => console.log(parm, source.readyState)
+    source.onopen    = parm  => console.log(parm, source.readyState)
     source.onmessage = event => this.processEvent(JSON.parse(event.data))
-    source.onerror = error => console.error('Status events error', error, source.readyState)
+    source.onerror   = error => console.error('Status events error', error, source.readyState)
   }
 
   private processEvent(state: State) {
     console.log('event arrived')
     this.sketch.addStateRecord(state)
     const set = (id: string, text: any) => document.getElementById(id).textContent = text
+    const sset = (id: string, decimalPlaces: number) => set(id, state[id].toFixed(decimalPlaces))
 
-    set('outside-temperature', state.outside_temp.toFixed(2))
-    set('wind-dir',            state.wind_dir.toFixed(0))
-    set('wind-speed',          state.wind_speed.toFixed(0))
-    set('gust',                state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
-    set('temperature',         state.current_temp.toFixed(1))
-    set('pressure',            state.pressure.toFixed(0))
-    set('humidity',            state.humidity.toFixed(0))
-    set('outside-humidity',    state.outside_humidity.toFixed(0))
-    set('display-desired',     state.desired_temp.toFixed(1))
+    sset('outside_temp',     2)
+    sset('wind_dir',         0)
+    sset('wind_speed',       0)
+    sset('inside_temp',      1)
+    sset('pressure',         0)
+    sset('inside_humidity',  0)
+    sset('outside_humidity', 0)
+    sset('desired_temp',     1)
 
-    const mwElem = document.getElementById('main-weather')
+    set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
+
+    const mwElem = document.getElementById('main_weather')
     mwElem.innerHTML = ''
     state.main_weather.forEach(mw => {
       const img = document.createElement('img')

@@ -1,9 +1,14 @@
 'Smart thermostat project main module'
 
-from queue import Queue
-from flask import Flask, jsonify, render_template, request, Response
 import json
 import threading
+from datetime import datetime
+from queue import Queue
+from time import sleep
+
+from flask import Flask, jsonify, render_template, request, Response
+from flask_sqlalchemy import SQLAlchemy
+
 try:
     from rpi.sensor import Sensor
     from rpi.relay import Relay
@@ -28,7 +33,22 @@ controller = ThermoController(WEATHER_QUERY, Sensor(),
     fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
 scheduler = Scheduler(controller)
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/daveb/devel/smart-thermostat/thermostat.db'
+db = SQLAlchemy(app)
 
+class Observation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.DateTime)
+    inside_temp = db.Column(db.Float)
+    outside_temp = db.Column(db.Float)
+    desired_temp = db.Column(db.Float)
+    inside_humidity = db.Column(db.Float)
+    outside_humidity = db.Column(db.Float)
+    pressure = db.Column(db.Float)
+    weather_codes = db.Column(db.String)
+    heater_is_on = db.Column(db.Boolean)
+
+db.create_all()
 
 @app.route('/')
 def index():
@@ -70,7 +90,7 @@ def schedule():
 @app.route('/status')
 def status():
     stream_state_queue = Queue(maxsize=5)
-    controller.add_listener(stream_state_queue)
+    controller.add_state_queue(stream_state_queue)
 
     def event_stream():
         while True:
@@ -88,7 +108,22 @@ def all_status():
 def _background_thread():
     while True:
         scheduler.update()
-        controller.update()
+        if state := controller.update():
+            print(state)
+            ob = Observation(
+                time=datetime.fromtimestamp(state['time']),
+                inside_temp=state['inside_temp'],
+                outside_temp=state['outside_temp'],
+                desired_temp=state['desired_temp'],
+                inside_humidity=state['inside_humidity'],
+                outside_humidity=state['outside_humidity'],
+                pressure=state['pressure'],
+                weather_codes=', '.join([str(mw['id']) for mw in state['main_weather']]),
+                heater_is_on=state['heater_is_on']
+            )
+            db.session.add(ob)
+            db.session.commit()
+        sleep(.1)
 
 
 threading.Thread(target=_background_thread).start()

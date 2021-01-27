@@ -19,7 +19,7 @@ const thermoSketch = new p5(p => {
     if (stateRecords.length === 0) return
 
     function minOrMax(fn, iv) {
-      const rf = (a, c) => fn(a, c.current_temp, c.desired_temp, c.outside_temp)
+      const rf = (a, c) => fn(a, c.inside_temp, c.desired_temp, c.outside_temp)
       return stateRecords.reduce(rf, iv)
     }
 
@@ -100,10 +100,10 @@ const thermoSketch = new p5(p => {
       p.strokeWeight(3)
       p.stroke('blue')
       if (prevRec) {
-        const prevTempY = tempToY(prevRec.current_temp);
+        const prevTempY = tempToY(prevRec.inside_temp);
         p.line(x, prevTempY, prevX, prevTempY)
       }
-      p.point(x, tempToY(rec.current_temp))
+      p.point(x, tempToY(rec.inside_temp))
 
       p.stroke('green')
       const desiredTempY = tempToY(rec.desired_temp);
@@ -114,7 +114,7 @@ const thermoSketch = new p5(p => {
 
       p.strokeWeight(6)
       p.stroke(255, 190, 0)
-      p.point(timeToX(rec.outside_temp_collection_time), tempToY(rec.outside_temp))
+      p.point(timeToX(rec.time), tempToY(rec.outside_temp))
       p.strokeWeight(3)
 
       if (rec.heater_is_on) {

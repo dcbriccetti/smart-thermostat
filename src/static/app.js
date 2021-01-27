@@ -20,16 +20,17 @@ class ThermoClient {
         console.log('event arrived');
         this.sketch.addStateRecord(state);
         const set = (id, text) => document.getElementById(id).textContent = text;
-        set('outside-temperature', state.outside_temp.toFixed(2));
-        set('wind-dir', state.wind_dir.toFixed(0));
-        set('wind-speed', state.wind_speed.toFixed(0));
+        const sset = (id, decimalPlaces) => set(id, state[id].toFixed(decimalPlaces));
+        sset('outside_temp', 2);
+        sset('wind_dir', 0);
+        sset('wind_speed', 0);
+        sset('inside_temp', 1);
+        sset('pressure', 0);
+        sset('inside_humidity', 0);
+        sset('outside_humidity', 0);
+        sset('desired_temp', 1);
         set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`);
-        set('temperature', state.current_temp.toFixed(1));
-        set('pressure', state.pressure.toFixed(0));
-        set('humidity', state.humidity.toFixed(0));
-        set('outside-humidity', state.outside_humidity.toFixed(0));
-        set('display-desired', state.desired_temp.toFixed(1));
-        const mwElem = document.getElementById('main-weather');
+        const mwElem = document.getElementById('main_weather');
         mwElem.innerHTML = '';
         state.main_weather.forEach(mw => {
             const img = document.createElement('img');
@@ -91,7 +92,7 @@ const thermoSketch = new p5(p => {
         if (stateRecords.length === 0)
             return;
         function minOrMax(fn, iv) {
-            const rf = (a, c) => fn(a, c.current_temp, c.desired_temp, c.outside_temp);
+            const rf = (a, c) => fn(a, c.inside_temp, c.desired_temp, c.outside_temp);
             return stateRecords.reduce(rf, iv);
         }
         const y_axis_margin_degrees = 1;
@@ -159,10 +160,10 @@ const thermoSketch = new p5(p => {
             p.strokeWeight(3);
             p.stroke('blue');
             if (prevRec) {
-                const prevTempY = tempToY(prevRec.current_temp);
+                const prevTempY = tempToY(prevRec.inside_temp);
                 p.line(x, prevTempY, prevX, prevTempY);
             }
-            p.point(x, tempToY(rec.current_temp));
+            p.point(x, tempToY(rec.inside_temp));
             p.stroke('green');
             const desiredTempY = tempToY(rec.desired_temp);
             if (prevRec && prevRec.desired_temp === rec.desired_temp) {
@@ -173,7 +174,7 @@ const thermoSketch = new p5(p => {
                 p.point(x, desiredTempY);
             p.strokeWeight(6);
             p.stroke(255, 190, 0);
-            p.point(timeToX(rec.outside_temp_collection_time), tempToY(rec.outside_temp));
+            p.point(timeToX(rec.time), tempToY(rec.outside_temp));
             p.strokeWeight(3);
             if (rec.heater_is_on) {
                 p.stroke('#9C2A00');
