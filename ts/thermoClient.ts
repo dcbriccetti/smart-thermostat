@@ -69,7 +69,7 @@ class ThermoClient {
   }
 
   adjustTemp(amount: number) {
-    fetch('increase_temperature', {
+    fetch('change_temperature', {
       method: 'POST',
       body: amount.toString()
     }).then(response => response)

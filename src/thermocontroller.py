@@ -78,7 +78,7 @@ class ThermoController:
         self.desired_temp = temperature
         self.desired_temp_changed = True
 
-    def increase_temperature(self, amount: float):
+    def change_temperature(self, amount: float):
         if amount:
             self.set_temperature(self.desired_temp + amount)
 

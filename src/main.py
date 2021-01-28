@@ -57,9 +57,9 @@ def index():
         schedule=scheduler.render())
 
 
-@app.route('/increase_temperature', methods=('POST',))
-def increase_temperature():
-    controller.increase_temperature(float(request.get_data()))
+@app.route('/change_temperature', methods=('POST',))
+def change_temperature():
+    controller.change_temperature(float(request.get_data()))
     return ''
 
 
