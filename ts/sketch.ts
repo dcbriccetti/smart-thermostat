@@ -95,14 +95,9 @@ const thermoSketch = new p5(p => {
       if (x < 0) break
 
       const prevRec = i >= 1 ? stateRecords[i - 1] : null
-      const prevX = prevRec ? timeToX(prevRec.time) : null
 
       p.strokeWeight(3)
       p.stroke('blue')
-      if (prevRec) {
-        const prevTempY = tempToY(prevRec.inside_temp);
-        p.line(x, prevTempY, prevX, prevTempY)
-      }
       p.point(x, tempToY(rec.inside_temp))
 
       p.stroke('green')
@@ -112,10 +107,8 @@ const thermoSketch = new p5(p => {
         p.line(x, desiredTempY, prevX, desiredTempY)
       } else p.point(x, desiredTempY)
 
-      p.strokeWeight(6)
       p.stroke(255, 190, 0)
       p.point(timeToX(rec.time), tempToY(rec.outside_temp))
-      p.strokeWeight(3)
 
       if (rec.heater_is_on) {
         p.stroke('#9C2A00')

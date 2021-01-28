@@ -1,8 +1,9 @@
-from typing import Dict, List, Any, Optional, Union
 from queue import Queue, Full
 from time import monotonic, time, sleep
-from sensorfail import SensorReadFailure
+from typing import Dict, List, Any, Optional
+
 from outside_weather import outside_weather
+from sensorfail import SensorReadFailure
 
 WEATHER_OBSERVATION_INTERVAL_SECS = 60
 
@@ -35,14 +36,16 @@ class ThermoController:
 
     def add_state_queue(self, queue: Queue):
         self.state_queues.append(queue)
-        self._enqueue_state_to_single_queue(self.current_state_dict(), queue)
+        self._enqueue_state_to_single_queue(self._current_state_dict(), queue)
 
     def update(self) -> Optional[Dict]:
         try:
             state: Optional[Dict] = None
             time_now = monotonic()
+            observations_taken = False
 
             if time_now >= self.next_weather_observation_time:
+                observations_taken = True
                 self._manage_outside_weather()
                 self.next_weather_observation_time = time_now + WEATHER_OBSERVATION_INTERVAL_SECS
 
@@ -61,11 +64,11 @@ class ThermoController:
             if hac_state_changing:
                 self._change_hac_state(hac_should_be_on)
 
-            if self.inside_temp != self.previous_temp or hac_state_changing or self.desired_temp_changed:
+            if observations_taken or hac_state_changing or self.desired_temp_changed:
                 self.previous_temp = self.inside_temp
                 self.desired_temp_changed = False
                 hs = hac_should_be_on if hac_state_changing else None
-                state = self.current_state_dict()
+                state = self._current_state_dict()
                 self.status_history.append(state)
                 self._enqueue_state_to_all_queues(state)
 
@@ -119,7 +122,7 @@ class ThermoController:
         except Full:
             pass
 
-    def current_state_dict(self) -> Dict[str, Any]:
+    def _current_state_dict(self) -> Dict[str, Any]:
         results = {
             'time':            time(),
             'inside_temp':     self.inside_temp,
