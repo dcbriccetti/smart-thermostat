@@ -33,7 +33,7 @@ controller = ThermoController(WEATHER_QUERY, Sensor(),
     fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
 scheduler = Scheduler(controller)
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/daveb/devel/smart-thermostat/thermostat.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../thermostat.db'
 db = SQLAlchemy(app)
 
 class Observation(db.Model):
