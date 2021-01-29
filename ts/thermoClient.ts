@@ -47,7 +47,7 @@ class ThermoClient {
     const set = (id: string, text: any) => document.getElementById(id).textContent = text
     const sset = (id: string, decimalPlaces: number) => set(id, state[id].toFixed(decimalPlaces))
 
-    sset('outside_temp',     2)
+    sset('outside_temp',     1)
     sset('wind_dir',         0)
     sset('wind_speed',       0)
     sset('inside_temp',      1)

@@ -21,7 +21,7 @@ class ThermoClient {
         this.sketch.addStateRecord(state);
         const set = (id, text) => document.getElementById(id).textContent = text;
         const sset = (id, decimalPlaces) => set(id, state[id].toFixed(decimalPlaces));
-        sset('outside_temp', 2);
+        sset('outside_temp', 1);
         sset('wind_dir', 0);
         sset('wind_speed', 0);
         sset('inside_temp', 1);
@@ -157,12 +157,12 @@ const thermoSketch = new p5(p => {
             if (x < 0)
                 break;
             p.strokeWeight(3);
-            p.stroke('blue');
-            p.point(x, tempToY(rec.inside_temp));
             p.stroke('green');
             p.point(x, tempToY(rec.desired_temp));
             p.stroke(255, 190, 0);
             p.point(x, tempToY(rec.outside_temp));
+            p.stroke('blue');
+            p.point(x, tempToY(rec.inside_temp));
             if (rec.heater_is_on) {
                 p.stroke('#9C2A00');
                 p.point(x, chartYBase - 6);

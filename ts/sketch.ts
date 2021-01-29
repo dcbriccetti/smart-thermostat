@@ -95,14 +95,15 @@ const thermoSketch = new p5(p => {
       if (x < 0) break
 
       p.strokeWeight(3)
-      p.stroke('blue')
-      p.point(x, tempToY(rec.inside_temp))
 
       p.stroke('green')
       p.point(x, tempToY(rec.desired_temp))
 
       p.stroke(255, 190, 0)
       p.point(x, tempToY(rec.outside_temp))
+
+      p.stroke('blue')
+      p.point(x, tempToY(rec.inside_temp))
 
       if (rec.heater_is_on) {
         p.stroke('#9C2A00')
