@@ -64,6 +64,7 @@ class ThermoClient {
       const img = document.createElement('img')
       img.src = `http://openweathermap.org/img/wn/${mw.icon}.png`
       img.alt = img.title = mw.description
+      img.classList.add('weather-img')
       mwElem.appendChild(img)
     });
   }

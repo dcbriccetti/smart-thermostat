@@ -36,6 +36,7 @@ class ThermoClient {
             const img = document.createElement('img');
             img.src = `http://openweathermap.org/img/wn/${mw.icon}.png`;
             img.alt = img.title = mw.description;
+            img.classList.add('weather-img');
             mwElem.appendChild(img);
         });
     }
@@ -81,8 +82,8 @@ class ThermoClient {
 const thermoSketch = new p5(p => {
     let stateRecords = [];
     p.setup = () => {
-        const vis = $('#visualization');
-        p.createCanvas(vis.width(), vis.height()).parent('visualization');
+        const vis = document.querySelector('#visualization');
+        p.createCanvas(vis.offsetWidth, vis.offsetHeight).parent('visualization');
     };
     p.draw = () => {
         p.frameRate(0.5);
@@ -155,20 +156,13 @@ const thermoSketch = new p5(p => {
             const x = timeToX(rec.time);
             if (x < 0)
                 break;
-            const prevRec = i >= 1 ? stateRecords[i - 1] : null;
             p.strokeWeight(3);
             p.stroke('blue');
             p.point(x, tempToY(rec.inside_temp));
             p.stroke('green');
-            const desiredTempY = tempToY(rec.desired_temp);
-            if (prevRec && prevRec.desired_temp === rec.desired_temp) {
-                const prevX = timeToX(prevRec.time);
-                p.line(x, desiredTempY, prevX, desiredTempY);
-            }
-            else
-                p.point(x, desiredTempY);
+            p.point(x, tempToY(rec.desired_temp));
             p.stroke(255, 190, 0);
-            p.point(timeToX(rec.time), tempToY(rec.outside_temp));
+            p.point(x, tempToY(rec.outside_temp));
             if (rec.heater_is_on) {
                 p.stroke('#9C2A00');
                 p.point(x, chartYBase - 6);
