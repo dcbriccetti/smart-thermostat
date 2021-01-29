@@ -1,9 +1,7 @@
 /venv/
 /.idea/
 /smart-thermostat.iml
-/temps.numbers
 /src/static/app.js
 /src/static/app.js.map
 /src/log.txt
-/log.txt
 /thermostat.db
