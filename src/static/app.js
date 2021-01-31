@@ -161,12 +161,8 @@ const thermoSketch = new p5(p => {
             p.point(x, tempToY(rec.desired_temp));
             p.stroke(255, 190, 0);
             p.point(x, tempToY(rec.outside_temp));
-            p.stroke('blue');
+            p.stroke(rec.heater_is_on ? '#9C2A00' : 'black');
             p.point(x, tempToY(rec.inside_temp));
-            if (rec.heater_is_on) {
-                p.stroke('#9C2A00');
-                p.point(x, chartYBase - 6);
-            }
         }
     };
     p.addStateRecord = record => stateRecords.push(record);
