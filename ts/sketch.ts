@@ -18,14 +18,15 @@ const thermoSketch = new p5(p => {
 
     if (stateRecords.length === 0) return
 
-    function minOrMax(fn, iv) {
-      const rf = (a, c) => fn(a, c.inside_temp, c.desired_temp, c.outside_temp)
-      return stateRecords.reduce(rf, iv)
-    }
-
+    const minOrMax = (reduce_fn, initial_value) => stateRecords.reduce(reduce_fn, initial_value)
+    const createTempReduceFn = minMaxFn => (a, c) => minMaxFn(a, c.inside_temp, c.desired_temp, c.outside_temp)
+    const createPressureReduceFn = minMaxFn => (a, c) => minMaxFn(a, c.pressure)
     const y_axis_margin_degrees = 1
-    const temp_min = minOrMax(Math.min,  50) - y_axis_margin_degrees
-    const temp_max = minOrMax(Math.max, -50) + y_axis_margin_degrees
+    const y_axis_margin_hPa = 10
+    const temp_min = minOrMax(createTempReduceFn(Math.min),  50) - y_axis_margin_degrees
+    const temp_max = minOrMax(createTempReduceFn(Math.max), -50) + y_axis_margin_degrees
+    const pressure_min = minOrMax(createPressureReduceFn(Math.min),  1500) - y_axis_margin_hPa
+    const pressure_max = minOrMax(createPressureReduceFn(Math.max), 0) + y_axis_margin_hPa
     const chartYBase = 20
 
     let timeStart = stateRecords[0].time
@@ -33,7 +34,8 @@ const thermoSketch = new p5(p => {
 
     let xRight = p.width - 20
 
-    const tempToY = y => p.map(y, temp_min, temp_max, chartYBase, p.height)
+    const tempToY = temp => p.map(temp, temp_min, temp_max, chartYBase, p.height)
+    const pressureToY = pressure => p.map(pressure, pressure_min, pressure_max, chartYBase, p.height)
 
     function timeToX(time) {
       const secondsFromEnd = timeEnd - time
@@ -89,20 +91,30 @@ const thermoSketch = new p5(p => {
     drawVertGridLines()
     drawHorzGridLines()
 
+    // Find leftmost visible record, so we can draw from left to right
+    let leftmost_visible_record_index = 0
     for (let i = stateRecords.length - 1; i >= 0; --i) {
-      const rec = stateRecords[i]
+      if (timeToX(stateRecords[i].time) < 0) {
+        leftmost_visible_record_index = i
+        break
+      }
+    }
+
+    for (const rec of stateRecords.slice(leftmost_visible_record_index)) {
       const x = timeToX(rec.time)
-      if (x < 0) break
 
       p.strokeWeight(3)
 
       p.stroke('green')
       p.point(x, tempToY(rec.desired_temp))
 
+      p.stroke('blue')
+      p.point(x, pressureToY(rec.pressure))
+
       p.stroke(255, 190, 0)
       p.point(x, tempToY(rec.outside_temp))
 
-      p.stroke(rec.heater_is_on ? '#9C2A00' : 'black')
+      p.stroke(rec.heater_is_on ? 'red' : 'black')
       p.point(x, tempToY(rec.inside_temp))
     }
   }
