@@ -105,8 +105,10 @@ const thermoSketch = new p5(p => {
 
       p.strokeWeight(3)
 
-      p.stroke('green')
-      p.point(x, tempToY(rec.desired_temp))
+      if (thermoClient.showingDesiredTemp) {
+        p.stroke('green')
+        p.point(x, tempToY(rec.desired_temp))
+      }
 
       p.stroke('blue')
       p.point(x, pressureToY(rec.pressure))

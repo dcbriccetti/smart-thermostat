@@ -58,6 +58,11 @@
                onclick="thermoClient.enableCool(document.querySelector('#cool').checked)"/>
         Cool</label>
     </div>
+    <div class="large-display">
+        <label style="margin-left: .2em;"><input checked id='show-desired-temp' type="checkbox" class="btn btn-primary"
+                                                 onclick="thermoClient.showDesiredTemp(document.querySelector('#show-desired-temp').checked)"/>
+            Show Desired Temperature</label>
+    </div>
     <div id='visualization'></div>
     <div>
         <div id='zoom-group' class="input-group">

@@ -1,6 +1,7 @@
 class ThermoClient {
     constructor(sketch) {
         this.sketch = sketch;
+        this.showingDesiredTemp = true;
         this.sliceSecs = 15;
         this.inEl('zoom').value = this.sliceSecs.toString();
         this.setUpEventProcessing();
@@ -63,6 +64,9 @@ class ThermoClient {
             method: 'PUT',
             body: this.inEl('schedule').value
         }).then(response => response);
+    }
+    showDesiredTemp(show) {
+        this.showingDesiredTemp = show;
     }
     zoom() {
         this.sliceSecs = Number(this.inEl('zoom').value);
@@ -165,8 +169,10 @@ const thermoSketch = new p5(p => {
         for (const rec of stateRecords.slice(leftmost_visible_record_index)) {
             const x = timeToX(rec.time);
             p.strokeWeight(3);
-            p.stroke('green');
-            p.point(x, tempToY(rec.desired_temp));
+            if (thermoClient.showingDesiredTemp) {
+                p.stroke('green');
+                p.point(x, tempToY(rec.desired_temp));
+            }
             p.stroke('blue');
             p.point(x, pressureToY(rec.pressure));
             p.stroke(255, 190, 0);
