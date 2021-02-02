@@ -21,6 +21,7 @@ interface State {
 
 class ThermoClient {
   public sliceSecs: number
+  public showingDesiredTemp: boolean = true;
   private eventSource: EventSource
 
   constructor(private sketch: Sketch) {
@@ -95,6 +96,10 @@ class ThermoClient {
       method: 'PUT',
       body: this.inEl('schedule').value
     }).then(response => response)
+  }
+
+  showDesiredTemp(show: boolean) {
+    this.showingDesiredTemp = show
   }
 
   private zoom() {
