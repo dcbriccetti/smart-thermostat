@@ -131,4 +131,4 @@ def _background_thread():
 
 threading.Thread(target=_background_thread).start()
 
-app.run(host='localhost', threaded=True, debug=True, use_reloader=False)
+app.run(host='0.0.0.0', threaded=True, debug=True, use_reloader=False)
