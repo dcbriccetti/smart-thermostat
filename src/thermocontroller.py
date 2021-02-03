@@ -30,7 +30,7 @@ class ThermoController:
         self.hac_is_on = False
         self.shutoff = None
         self.state_queues = []
-        self.status_history = starting_data
+        self.status_history = self.observations_to_statuses(starting_data)
         self.next_temp_read_time = monotonic()
         self.next_weather_observation_time = monotonic()
 
@@ -143,3 +143,9 @@ class ThermoController:
         current_hac, other_hac = (self.cooler, self.heater) if self.cooling else (self.heater, self.cooler)
         other_hac.enable(False)
         current_hac.enable(on=should_be_on)
+
+    def observations_to_statuses(self, starting_data: List):
+        return [{'time': row.time.timestamp(), 'inside_temp': row.inside_temp, 'desired_temp': row.desired_temp,
+                 'inside_humidity': row.inside_humidity, 'heater_is_on': row.heater_is_on,
+                 'outside_temp': row.outside_temp, 'pressure': row.pressure, 'outside_humidity': row.outside_humidity}
+            for row in starting_data]

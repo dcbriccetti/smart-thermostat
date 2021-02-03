@@ -46,9 +46,9 @@ class Observation(db.Model):
 
 db.create_all()
 
-rows = Observation.query.order_by(Observation.time.desc()).limit(24 * 60).all()
+observations = Observation.query.order_by(Observation.time).all()
 
-controller = ThermoController(WEATHER_QUERY, Sensor(), rows,
+controller = ThermoController(WEATHER_QUERY, Sensor(), observations,
     heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
     fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
 scheduler = Scheduler(controller)
