@@ -28,10 +28,6 @@ TEMP_CHANGE_INCREMENT = 0.1
 DEFAULT_DESIRED_TEMP = 21.0
 BUTTON_REPEAT_DELAY_SECS = 0.3
 
-controller = ThermoController(WEATHER_QUERY, Sensor(),
-    heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
-    fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
-scheduler = Scheduler(controller)
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../thermostat.db'
 db = SQLAlchemy(app)
@@ -49,6 +45,13 @@ class Observation(db.Model):
     heater_is_on = db.Column(db.Boolean)
 
 db.create_all()
+
+rows = Observation.query.order_by(Observation.time.desc()).limit(24 * 60).all()
+
+controller = ThermoController(WEATHER_QUERY, Sensor(),
+    heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
+    fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
+scheduler = Scheduler(controller)
 
 @app.route('/')
 def index():
