@@ -12,7 +12,7 @@ class ThermoController:
     outside_weather: Dict[str, Any]
     state_queues: List[Queue]
 
-    def __init__(self, weather_query: str, sensor, heater, cooler, fan, desired_temp: float):
+    def __init__(self, weather_query: str, sensor, starting_data: List, heater, cooler, fan, desired_temp: float):
         self.weather_query = weather_query
         self.sensor = sensor
         self.heater = heater
@@ -30,7 +30,7 @@ class ThermoController:
         self.hac_is_on = False
         self.shutoff = None
         self.state_queues = []
-        self.status_history = []
+        self.status_history = starting_data
         self.next_temp_read_time = monotonic()
         self.next_weather_observation_time = monotonic()
 

@@ -48,7 +48,7 @@ db.create_all()
 
 rows = Observation.query.order_by(Observation.time.desc()).limit(24 * 60).all()
 
-controller = ThermoController(WEATHER_QUERY, Sensor(),
+controller = ThermoController(WEATHER_QUERY, Sensor(), rows,
     heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
     fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
 scheduler = Scheduler(controller)
@@ -131,4 +131,4 @@ def _background_thread():
 
 threading.Thread(target=_background_thread).start()
 
-app.run(host='0.0.0.0', threaded=True, debug=True, use_reloader=False)
+app.run(host='localhost', threaded=True, debug=True, use_reloader=False)
