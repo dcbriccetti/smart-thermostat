@@ -3,11 +3,9 @@ class ThermoClient {
         this.sketch = sketch;
         this.showingDesiredTemp = true;
         this.sliceSecs = 15;
-        this.inEl('zoom').value = this.sliceSecs.toString();
+        this.inputElement('zoom').value = this.sliceSecs.toString();
         this.setUpEventProcessing();
-        document.addEventListener("visibilitychange", () => {
-            this.visibilityChanged(!document.hidden);
-        }, false);
+        document.addEventListener("visibilitychange", () => this.visibilityChanged(!document.hidden), false);
     }
     setUpEventProcessing() {
         fetch('all-status').then(r => r.json()).then(j => this.sketch.addAllStateRecords(j));
@@ -62,14 +60,14 @@ class ThermoClient {
     schedule() {
         fetch('schedule', {
             method: 'PUT',
-            body: this.inEl('schedule').value
+            body: this.inputElement('schedule').value
         }).then(response => response);
     }
     showDesiredTemp(show) {
         this.showingDesiredTemp = show;
     }
     zoom() {
-        this.sliceSecs = Number(this.inEl('zoom').value);
+        this.sliceSecs = Number(this.inputElement('zoom').value);
     }
     visibilityChanged(visible) {
         const rs = this.eventSource.readyState;
@@ -78,7 +76,7 @@ class ThermoClient {
             this.setUpEventProcessing();
         }
     }
-    inEl(selector) {
+    inputElement(selector) {
         return document.getElementById(selector);
     }
 }

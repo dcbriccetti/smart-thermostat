@@ -26,11 +26,9 @@ class ThermoClient {
 
   constructor(private sketch: Sketch) {
     this.sliceSecs = 15
-    this.inEl('zoom').value = this.sliceSecs.toString()
+    this.inputElement('zoom').value = this.sliceSecs.toString()
     this.setUpEventProcessing()
-    document.addEventListener("visibilitychange", () => {
-      this.visibilityChanged(!document.hidden)
-    }, false)
+    document.addEventListener("visibilitychange", () => this.visibilityChanged(!document.hidden), false)
   }
 
   private setUpEventProcessing() {
@@ -94,7 +92,7 @@ class ThermoClient {
   schedule() {
     fetch('schedule', {
       method: 'PUT',
-      body: this.inEl('schedule').value
+      body: this.inputElement('schedule').value
     }).then(response => response)
   }
 
@@ -103,7 +101,7 @@ class ThermoClient {
   }
 
   private zoom() {
-    this.sliceSecs = Number(this.inEl('zoom').value)
+    this.sliceSecs = Number(this.inputElement('zoom').value)
   }
 
   private visibilityChanged(visible) {
@@ -114,7 +112,7 @@ class ThermoClient {
     }
   }
 
-  private inEl(selector: string) {
+  private inputElement(selector: string) {
     return <HTMLInputElement>document.getElementById(selector)
   }
 }
