@@ -22,6 +22,8 @@ interface State {
 class ThermoClient {
   public sliceSecs: number
   public showingDesiredTemp: boolean = true;
+  public showingPressure: boolean = true;
+  public showingOutsideTemp: boolean = true;
   private eventSource: EventSource
 
   constructor(private sketch: Sketch) {
@@ -98,6 +100,14 @@ class ThermoClient {
 
   showDesiredTemp(show: boolean) {
     this.showingDesiredTemp = show
+  }
+  
+  showPressure(show: boolean) {
+    this.showingPressure = show
+  }
+
+  showOutsideTemp(show: boolean) {
+    this.showingOutsideTemp = show
   }
 
   private zoom() {

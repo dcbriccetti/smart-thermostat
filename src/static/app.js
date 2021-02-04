@@ -2,6 +2,8 @@ class ThermoClient {
     constructor(sketch) {
         this.sketch = sketch;
         this.showingDesiredTemp = true;
+        this.showingPressure = true;
+        this.showingOutsideTemp = true;
         this.sliceSecs = 15;
         this.inputElement('zoom').value = this.sliceSecs.toString();
         this.setUpEventProcessing();
@@ -65,6 +67,12 @@ class ThermoClient {
     }
     showDesiredTemp(show) {
         this.showingDesiredTemp = show;
+    }
+    showPressure(show) {
+        this.showingPressure = show;
+    }
+    showOutsideTemp(show) {
+        this.showingOutsideTemp = show;
     }
     zoom() {
         this.sliceSecs = Number(this.inputElement('zoom').value);
@@ -171,10 +179,14 @@ const thermoSketch = new p5(p => {
                 p.stroke('green');
                 p.point(x, tempToY(rec.desired_temp));
             }
-            p.stroke('blue');
-            p.point(x, pressureToY(rec.pressure));
-            p.stroke(255, 190, 0);
-            p.point(x, tempToY(rec.outside_temp));
+            if (thermoClient.showingPressure) {
+                p.stroke('blue');
+                p.point(x, pressureToY(rec.pressure));
+            }
+            if (thermoClient.showingOutsideTemp) {
+                p.stroke(255, 190, 0);
+                p.point(x, tempToY(rec.outside_temp));
+            }
             p.stroke(rec.heater_is_on ? 'red' : 'black');
             p.point(x, tempToY(rec.inside_temp));
         }
