@@ -41,18 +41,19 @@ const thermoSketch = new p5(p => {
     const visibleStateRecords = stateRecords.slice(leftmost_visible_record_index)
 
     const minOrMax = (reduce_fn, initial_value) => visibleStateRecords.reduce(reduce_fn, initial_value)
-    const createTempReduceFn = minMaxFn => (a, c) => minMaxFn(a, c.inside_temp, c.desired_temp, c.outside_temp)
-    const createPressureReduceFn = minMaxFn => (a, c) => minMaxFn(a, c.pressure)
+    const createTempReduceFn = minMaxFn => (a, c) => {
+      const temps = [a, c.inside_temp]
+      if (thermoClient.showingDesiredTemp) temps.push(c.desired_temp)
+      if (thermoClient.showingOutsideTemp) temps.push(c.outside_temp)
+      return minMaxFn(...temps)
+    }
     const y_axis_margin_degrees = 1
     const y_axis_margin_hPa = 10
     const temp_min = minOrMax(createTempReduceFn(Math.min),  50) - y_axis_margin_degrees
     const temp_max = minOrMax(createTempReduceFn(Math.max), -50) + y_axis_margin_degrees
-    const pressure_min = minOrMax(createPressureReduceFn(Math.min),  1500) - y_axis_margin_hPa
-    const pressure_max = minOrMax(createPressureReduceFn(Math.max), 0) + y_axis_margin_hPa
     const chartYBase = 20
 
     const tempToY = temp => p.map(temp, temp_min, temp_max, chartYBase, p.height)
-    const pressureToY = pressure => p.map(pressure, pressure_min, pressure_max, chartYBase, p.height)
 
     function drawVertGridLines() {
       const gridLow = Math.floor(temp_min)
@@ -110,11 +111,6 @@ const thermoSketch = new p5(p => {
       if (thermoClient.showingDesiredTemp) {
         p.stroke('green')
         p.point(x, tempToY(rec.desired_temp))
-      }
-
-      if (false) { // Pressure doesn’t belong on a Celsius scale
-        p.stroke('blue')
-        p.point(x, pressureToY(rec.pressure))
       }
 
       if (thermoClient.showingOutsideTemp) {
