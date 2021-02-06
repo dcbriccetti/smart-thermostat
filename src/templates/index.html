@@ -13,7 +13,7 @@
         }
 
         .large-display {
-            font-size: 150%;
+            font-size: 130%;
         }
 
         .big-arrow {
@@ -58,10 +58,18 @@
                onclick="thermoClient.enableCool(document.querySelector('#cool').checked)"/>
         Cool</label>
     </div>
-    <div class="large-display">
-        <label style="margin-left: .2em;"><input checked id='show-desired-temp' type="checkbox" class="btn btn-primary"
-                                                 onclick="thermoClient.showDesiredTemp(document.querySelector('#show-desired-temp').checked)"/>
-            Show Desired Temperature</label>
+    <div>
+        Show: 
+        <label style="margin-left: .2em;">
+            <input checked id='show-desired-temp' type="checkbox" class="btn btn-primary"
+                onclick="thermoClient.showDesiredTemp(document.querySelector('#show-desired-temp').checked)"/>
+            Desired Temp.
+        </label>
+        <label style="margin-left: .2em;">
+            <input checked id='show-outside-temp' type="checkbox" class="btn btn-primary"
+                onclick="thermoClient.showOutsideTemp(document.querySelector('#show-outside-temp').checked)"/>
+            Outside Temp.
+        </label>
     </div>
     <div id='visualization'></div>
     <div>

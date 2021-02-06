@@ -113,8 +113,10 @@ const thermoSketch = new p5(p => {
       p.stroke('blue')
       p.point(x, pressureToY(rec.pressure))
 
-      p.stroke(255, 190, 0)
-      p.point(x, tempToY(rec.outside_temp))
+      if (thermoClient.showingOutsideTemp) {
+        p.stroke(255, 190, 0)
+        p.point(x, tempToY(rec.outside_temp))
+      }
 
       p.stroke(rec.heater_is_on ? 'red' : 'black')
       p.point(x, tempToY(rec.inside_temp))
