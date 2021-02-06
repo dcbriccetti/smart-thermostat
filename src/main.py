@@ -113,19 +113,20 @@ def _background_thread():
         scheduler.update()
         if state := controller.update():
             print(state)
-            ob = Observation(
-                time=datetime.fromtimestamp(state['time']),
-                inside_temp=state['inside_temp'],
-                outside_temp=state['outside_temp'],
-                desired_temp=state['desired_temp'],
-                inside_humidity=state['inside_humidity'],
-                outside_humidity=state['outside_humidity'],
-                pressure=state['pressure'],
-                weather_codes=', '.join([str(mw['id']) for mw in state['main_weather']]),
-                heater_is_on=state['heater_is_on']
-            )
-            db.session.add(ob)
-            db.session.commit()
+            if 'outside_temp' in state:
+                ob = Observation(
+                    time=datetime.fromtimestamp(state['time']),
+                    inside_temp=state['inside_temp'],
+                    outside_temp=state['outside_temp'],
+                    desired_temp=state['desired_temp'],
+                    inside_humidity=state['inside_humidity'],
+                    outside_humidity=state['outside_humidity'],
+                    pressure=state['pressure'],
+                    weather_codes=', '.join([str(mw['id']) for mw in state['main_weather']]),
+                    heater_is_on=state['heater_is_on']
+                )
+                db.session.add(ob)
+                db.session.commit()
         sleep(.1)
 
 
