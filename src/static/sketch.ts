@@ -123,8 +123,7 @@ const thermoSketch = new p5(p => {
     }
   }
 
-  p.addStateRecord = record => stateRecords.push(record)
-  p.addAllStateRecords = records => stateRecords = records
+  p.setStateRecords = records => stateRecords = records
 })
 
 const thermoClient = new ThermoClient(thermoSketch)

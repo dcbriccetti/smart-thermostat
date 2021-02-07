@@ -1,6 +1,5 @@
 interface Sketch {
-  addAllStateRecords: (string) => void
-  addStateRecord:     (string) => void
+  setStateRecords: ([]) => void
 }
 
 interface State {
@@ -24,6 +23,7 @@ class ThermoClient {
   public showingDesiredTemp = true
   public showingOutsideTemp = true
   private eventSource: EventSource
+  private stateRecords = [] // Shared with sketch.ts
 
   constructor(private sketch: Sketch) {
     this.sliceSecs = 15
@@ -33,7 +33,10 @@ class ThermoClient {
   }
 
   private setUpEventProcessing() {
-    fetch('all-status').then(r => r.json()).then(j => this.sketch.addAllStateRecords(j))
+    fetch('all-status').then(response => response.json()).then((stateRecords: [{}]) => {
+      this.stateRecords = stateRecords
+      this.sketch.setStateRecords(stateRecords)
+    })
     const source = this.eventSource = new EventSource('/status')
     console.log(`Created EventSource. readyState: ${source.readyState}`)
     source.onopen    = parm  => console.log(parm, source.readyState)
@@ -43,7 +46,7 @@ class ThermoClient {
 
   private processEvent(state: State) {
     console.log('event arrived')
-    this.sketch.addStateRecord(state)
+    this.stateRecords.push(state)
     const set = (id: string, text: any) => document.getElementById(id).textContent = text
     const sset = (id: string, decimalPlaces: number) => set(id, state[id].toFixed(decimalPlaces))
 
@@ -57,6 +60,7 @@ class ThermoClient {
     sset('desired_temp',     1)
 
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
+    set('outside_temp_change_slope', this.outside_temp_change_slope().toFixed(4))
 
     const mwElem = document.getElementById('main_weather')
     mwElem.innerHTML = ''
@@ -119,5 +123,39 @@ class ThermoClient {
 
   private inputElement(selector: string) {
     return <HTMLInputElement>document.getElementById(selector)
+  }
+
+  private outside_temp_change_slope(): number {
+    const n = this.stateRecords.length
+    const numElements = 30
+    if (n < numElements) return 0
+
+    const firstTime = this.stateRecords[n- numElements].time
+    const firstTemp = this.stateRecords[n- numElements].outside_temp
+    const recentStates = this.stateRecords.slice(n-numElements, n)
+    const xs = recentStates.map(state => (state.time - firstTime) / 3600)
+    const ys = recentStates.map(state => state.outside_temp - firstTemp)
+    return ThermoClient.slope(ys, xs)
+  }
+
+  private static slope(ys, xs) {
+    const n = ys.length
+    let sum_x = 0
+    let sum_y = 0
+    let sum_xy = 0
+    let sum_xx = 0
+    let sum_yy = 0
+
+    for (var i = 0; i < ys.length; i++) {
+      const x = xs[i]
+      const y = ys[i]
+      sum_x += x
+      sum_y += y
+      sum_xy += x * y
+      sum_xx += x * x
+      sum_yy += y * y
+    }
+
+    return (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x)
   }
 }

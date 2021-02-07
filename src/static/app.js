@@ -3,13 +3,17 @@ class ThermoClient {
         this.sketch = sketch;
         this.showingDesiredTemp = true;
         this.showingOutsideTemp = true;
+        this.stateRecords = []; // Shared with sketch.ts
         this.sliceSecs = 15;
         this.inputElement('zoom').value = this.sliceSecs.toString();
         this.setUpEventProcessing();
         document.addEventListener("visibilitychange", () => this.visibilityChanged(!document.hidden), false);
     }
     setUpEventProcessing() {
-        fetch('all-status').then(r => r.json()).then(j => this.sketch.addAllStateRecords(j));
+        fetch('all-status').then(response => response.json()).then((stateRecords) => {
+            this.stateRecords = stateRecords;
+            this.sketch.setStateRecords(stateRecords);
+        });
         const source = this.eventSource = new EventSource('/status');
         console.log(`Created EventSource. readyState: ${source.readyState}`);
         source.onopen = parm => console.log(parm, source.readyState);
@@ -18,7 +22,7 @@ class ThermoClient {
     }
     processEvent(state) {
         console.log('event arrived');
-        this.sketch.addStateRecord(state);
+        this.stateRecords.push(state);
         const set = (id, text) => document.getElementById(id).textContent = text;
         const sset = (id, decimalPlaces) => set(id, state[id].toFixed(decimalPlaces));
         sset('outside_temp', 1);
@@ -30,6 +34,7 @@ class ThermoClient {
         sset('outside_humidity', 0);
         sset('desired_temp', 1);
         set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`);
+        set('outside_temp_change_slope', this.outside_temp_change_slope().toFixed(4));
         const mwElem = document.getElementById('main_weather');
         mwElem.innerHTML = '';
         state.main_weather.forEach(mw => {
@@ -82,6 +87,36 @@ class ThermoClient {
     }
     inputElement(selector) {
         return document.getElementById(selector);
+    }
+    outside_temp_change_slope() {
+        const n = this.stateRecords.length;
+        const numElements = 30;
+        if (n < numElements)
+            return 0;
+        const firstTime = this.stateRecords[n - numElements].time;
+        const firstTemp = this.stateRecords[n - numElements].outside_temp;
+        const recentStates = this.stateRecords.slice(n - numElements, n);
+        const xs = recentStates.map(state => (state.time - firstTime) / 3600);
+        const ys = recentStates.map(state => state.outside_temp - firstTemp);
+        return ThermoClient.slope(ys, xs);
+    }
+    static slope(ys, xs) {
+        const n = ys.length;
+        let sum_x = 0;
+        let sum_y = 0;
+        let sum_xy = 0;
+        let sum_xx = 0;
+        let sum_yy = 0;
+        for (var i = 0; i < ys.length; i++) {
+            const x = xs[i];
+            const y = ys[i];
+            sum_x += x;
+            sum_y += y;
+            sum_xy += x * y;
+            sum_xx += x * x;
+            sum_yy += y * y;
+        }
+        return (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
     }
 }
 ///<reference path="thermoClient.ts"/>
@@ -187,8 +222,7 @@ const thermoSketch = new p5(p => {
             p.point(x, tempToY(rec.inside_temp));
         }
     };
-    p.addStateRecord = record => stateRecords.push(record);
-    p.addAllStateRecords = records => stateRecords = records;
+    p.setStateRecords = records => stateRecords = records;
 });
 const thermoClient = new ThermoClient(thermoSketch);
 //# sourceMappingURL=app.js.map
