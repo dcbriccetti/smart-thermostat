@@ -90,16 +90,16 @@ class ThermoClient {
         return document.getElementById(selector);
     }
     inside_temp_change_slope() {
-        return this.temp_change_slope(state => state.inside_temp);
+        return this.temp_change_slope(state => state.inside_temp, 3);
     }
     outside_temp_change_slope() {
-        return this.temp_change_slope(state => state.outside_temp);
+        return this.temp_change_slope(state => state.outside_temp, 30);
     }
-    temp_change_slope(fieldFromState) {
+    temp_change_slope(fieldFromState, numRecords) {
         const n = this.stateRecords.length;
         if (n < 2)
             return 0;
-        const numRecentElements = Math.min(30, n);
+        const numRecentElements = Math.min(numRecords, n);
         const firstState = this.stateRecords[n - numRecentElements];
         const firstTime = firstState.time;
         const firstTemp = fieldFromState(firstState);
