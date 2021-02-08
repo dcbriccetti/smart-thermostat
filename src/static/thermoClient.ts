@@ -60,7 +60,8 @@ class ThermoClient {
     sset('desired_temp',     1)
 
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
-    set('outside_temp_change_slope', this.outside_temp_change_slope().toFixed(4))
+    set('outside_temp_change_slope', this.outside_temp_change_slope().toFixed(3))
+    set('inside_temp_change_slope', this.inside_temp_change_slope().toFixed(3))
 
     const mwElem = document.getElementById('main_weather')
     mwElem.innerHTML = ''
@@ -125,16 +126,25 @@ class ThermoClient {
     return <HTMLInputElement>document.getElementById(selector)
   }
 
-  private outside_temp_change_slope(): number {
-    const n = this.stateRecords.length
-    const numElements = 30
-    if (n < numElements) return 0
+  private inside_temp_change_slope(): number {
+    return this.temp_change_slope(state => state.inside_temp)
+  }
 
-    const firstTime = this.stateRecords[n- numElements].time
-    const firstTemp = this.stateRecords[n- numElements].outside_temp
-    const recentStates = this.stateRecords.slice(n-numElements, n)
+  private outside_temp_change_slope(): number {
+    return this.temp_change_slope(state => state.outside_temp)
+  }
+
+  private temp_change_slope(fieldFromState: (state) => number): number {
+    const n = this.stateRecords.length
+    if (n < 2) return 0
+    const numRecentElements = Math.min(30, n)
+
+    const firstState = this.stateRecords[n - numRecentElements]
+    const firstTime = firstState.time
+    const firstTemp = fieldFromState(firstState)
+    const recentStates = this.stateRecords.slice(n - numRecentElements, n)
     const xs = recentStates.map(state => (state.time - firstTime) / 3600)
-    const ys = recentStates.map(state => state.outside_temp - firstTemp)
+    const ys = recentStates.map(state => fieldFromState(state) - firstTemp)
     return ThermoClient.slope(ys, xs)
   }
 
