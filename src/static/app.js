@@ -106,25 +106,7 @@ class ThermoClient {
         const recentStates = this.stateRecords.slice(n - numRecentElements, n);
         const xs = recentStates.map(state => (state.time - firstTime) / 3600);
         const ys = recentStates.map(state => fieldFromState(state) - firstTemp);
-        return ThermoClient.slope(ys, xs);
-    }
-    static slope(ys, xs) {
-        const n = ys.length;
-        let sum_x = 0;
-        let sum_y = 0;
-        let sum_xy = 0;
-        let sum_xx = 0;
-        let sum_yy = 0;
-        for (var i = 0; i < ys.length; i++) {
-            const x = xs[i];
-            const y = ys[i];
-            sum_x += x;
-            sum_y += y;
-            sum_xy += x * y;
-            sum_xx += x * x;
-            sum_yy += y * y;
-        }
-        return (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
+        return slope(ys, xs);
     }
 }
 ///<reference path="thermoClient.ts"/>
@@ -233,4 +215,22 @@ const thermoSketch = new p5(p => {
     p.setStateRecords = records => stateRecords = records;
 });
 const thermoClient = new ThermoClient(thermoSketch);
+function slope(ys, xs) {
+    const n = ys.length;
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumXX = 0;
+    let sumYY = 0;
+    for (var i = 0; i < ys.length; i++) {
+        const x = xs[i];
+        const y = ys[i];
+        sumX += x;
+        sumY += y;
+        sumXY += x * y;
+        sumXX += x * x;
+        sumYY += y * y;
+    }
+    return (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+}
 //# sourceMappingURL=app.js.map
