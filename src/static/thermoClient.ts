@@ -36,17 +36,21 @@ class ThermoClient {
     fetch('all-status').then(response => response.json()).then((stateRecords: [{}]) => {
       this.stateRecords = stateRecords
       this.sketch.setStateRecords(stateRecords)
+
+      const source = this.eventSource = new EventSource('/status')
+      console.log(`Created EventSource. readyState: ${source.readyState}`)
+      source.onopen    = parm  => console.log(parm, source.readyState)
+      source.onmessage = event => {
+        const state = JSON.parse(event.data)
+        this.stateRecords.push(state)
+        this.processEvent(state)
+      }
+      source.onerror   = error => console.error('Status events error', error, source.readyState)
     })
-    const source = this.eventSource = new EventSource('/status')
-    console.log(`Created EventSource. readyState: ${source.readyState}`)
-    source.onopen    = parm  => console.log(parm, source.readyState)
-    source.onmessage = event => this.processEvent(JSON.parse(event.data))
-    source.onerror   = error => console.error('Status events error', error, source.readyState)
   }
 
   private processEvent(state: State) {
-    console.log('event arrived')
-    this.stateRecords.push(state)
+    console.log('processEvent')
     const set = (id: string, text: any) => document.getElementById(id).textContent = text
     const sset = (id: string, decimalPlaces: number) => set(id, state[id].toFixed(decimalPlaces))
 
@@ -60,8 +64,8 @@ class ThermoClient {
     sset('desired_temp',     1)
 
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
-    set('outside_temp_change_slope', this.outside_temp_change_slope().toFixed(3))
-    set('inside_temp_change_slope', this.inside_temp_change_slope().toFixed(3))
+    set('outside_temp_change_slope', this.outside_temp_change_slope().toFixed(2))
+    set('inside_temp_change_slope', this.inside_temp_change_slope().toFixed(2))
 
     const mwElem = document.getElementById('main_weather')
     mwElem.innerHTML = ''
@@ -134,15 +138,15 @@ class ThermoClient {
     return this.temp_change_slope(state => state.outside_temp, 30)
   }
 
-  private temp_change_slope(fieldFromState: (state) => number, numRecords: number): number {
-    const n = this.stateRecords.length
-    if (n < 2) return 0
-    const numRecentElements = Math.min(numRecords, n)
+  private temp_change_slope(fieldFromState: (state) => number, numRecordsInSlope: number): number {
+    const numRecords = this.stateRecords.length
+    if (numRecords < 2) return 0
 
-    const firstState = this.stateRecords[n - numRecentElements]
+    const numRecentRecords = Math.min(numRecordsInSlope, numRecords)
+    const firstState = this.stateRecords[numRecords - numRecentRecords]
     const firstTime = firstState.time
     const firstTemp = fieldFromState(firstState)
-    const recentStates = this.stateRecords.slice(n - numRecentElements, n)
+    const recentStates = this.stateRecords.slice(numRecords - numRecentRecords, numRecords)
     const xs = recentStates.map(state => (state.time - firstTime) / 3600)
     const ys = recentStates.map(state => fieldFromState(state) - firstTemp)
     return slope(ys, xs)
