@@ -64,8 +64,10 @@ class ThermoClient {
     sset('desired_temp',     1)
 
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
-    set('outside_temp_change_slope', this.outside_temp_change_slope().toFixed(2))
-    set('inside_temp_change_slope', this.inside_temp_change_slope().toFixed(2))
+
+    const arrow = (value: number) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(2)
+    set('outside_temp_change_slope', arrow(this.outside_temp_change_slope()))
+    set('inside_temp_change_slope', arrow(this.inside_temp_change_slope()))
 
     const mwElem = document.getElementById('main_weather')
     mwElem.innerHTML = ''
