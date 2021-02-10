@@ -94,16 +94,31 @@ class ThermoClient {
         return document.getElementById(selector);
     }
     inside_temp_change_slope() {
-        return this.temp_change_slope(state => state.inside_temp, 3);
+        const numRecords = this.stateRecords.length;
+        if (numRecords < 2)
+            return 0;
+        const numRecentRecords = Math.min(30, numRecords);
+        let rightmostHeatOn; // distance from the rightmost sample
+        for (let i = 0; i < numRecentRecords; ++i) {
+            if (this.stateRecords[numRecords - 1 - i].heater_is_on) {
+                rightmostHeatOn = i;
+                break;
+            }
+        }
+        const marginForHeatAndThermometerDelay = 5;
+        let numRequested = rightmostHeatOn === undefined ? numRecentRecords :
+            Math.max(0, rightmostHeatOn - marginForHeatAndThermometerDelay);
+        console.log(`Using ${numRequested} samples for indoor temperature change slope calculation`);
+        return this.temp_change_slope(state => state.inside_temp, numRequested);
     }
     outside_temp_change_slope() {
         return this.temp_change_slope(state => state.outside_temp, 30);
     }
     temp_change_slope(fieldFromState, numRecordsInSlope) {
         const numRecords = this.stateRecords.length;
-        if (numRecords < 2)
-            return 0;
         const numRecentRecords = Math.min(numRecordsInSlope, numRecords);
+        if (numRecentRecords < 2)
+            return 0;
         const firstState = this.stateRecords[numRecords - numRecentRecords];
         const firstTime = firstState.time;
         const firstTemp = fieldFromState(firstState);

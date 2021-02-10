@@ -16,6 +16,7 @@ interface State {
   }]
   inside_humidity:  number
   outside_humidity: number
+  heater_is_on:     boolean
 }
 
 class ThermoClient {
@@ -133,7 +134,22 @@ class ThermoClient {
   }
 
   private inside_temp_change_slope(): number {
-    return this.temp_change_slope(state => state.inside_temp, 3)
+    const numRecords = this.stateRecords.length
+    if (numRecords < 2) return 0
+
+    const numRecentRecords = Math.min(30, numRecords)
+    let rightmostHeatOn: number // distance from the rightmost sample
+    for (let i = 0; i < numRecentRecords; ++i) {
+      if (this.stateRecords[numRecords - 1 - i].heater_is_on) {
+        rightmostHeatOn = i
+        break
+      }
+    }
+    const marginForHeatAndThermometerDelay = 5
+    let numRequested = rightmostHeatOn === undefined ? numRecentRecords :
+      Math.max(0, rightmostHeatOn - marginForHeatAndThermometerDelay)
+    console.log(`Using ${numRequested} samples for indoor temperature change slope calculation`)
+    return this.temp_change_slope(state => state.inside_temp, numRequested)
   }
 
   private outside_temp_change_slope(): number {
@@ -142,9 +158,9 @@ class ThermoClient {
 
   private temp_change_slope(fieldFromState: (state) => number, numRecordsInSlope: number): number {
     const numRecords = this.stateRecords.length
-    if (numRecords < 2) return 0
-
     const numRecentRecords = Math.min(numRecordsInSlope, numRecords)
+    if (numRecentRecords < 2) return 0
+
     const firstState = this.stateRecords[numRecords - numRecentRecords]
     const firstTime = firstState.time
     const firstTemp = fieldFromState(firstState)
