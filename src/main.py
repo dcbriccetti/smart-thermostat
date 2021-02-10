@@ -114,20 +114,20 @@ def _background_thread():
         if state := thermoController.update():
             print(state)
             if 'outside_temp' in state:
-                ob = Observation(
-                    time=datetime.fromtimestamp(state['time']),
-                    inside_temp=state['inside_temp'],
-                    outside_temp=state['outside_temp'],
-                    desired_temp=state['desired_temp'],
-                    inside_humidity=state['inside_humidity'],
-                    outside_humidity=state['outside_humidity'],
-                    pressure=state['pressure'],
-                    weather_codes=', '.join([str(mw['id']) for mw in state['main_weather']]),
-                    heater_is_on=state['heater_is_on']
-                )
-                db.session.add(ob)
-                db.session.commit()
+                save_observation(state)
         sleep(.1)
+
+
+def save_observation(state):
+    keys = 'inside_temp outside_temp desired_temp inside_humidity outside_humidity pressure heater_is_on'.split(' ')
+    args_dict = {key: state[key] for key in keys}
+    ob = Observation(
+        time=datetime.fromtimestamp(state['time']),
+        weather_codes=', '.join([str(mw['id']) for mw in state['main_weather']]),
+        **args_dict
+    )
+    db.session.add(ob)
+    db.session.commit()
 
 
 threading.Thread(target=_background_thread).start()
