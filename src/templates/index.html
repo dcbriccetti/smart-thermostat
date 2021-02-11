@@ -54,7 +54,10 @@
     </div>
     <div class="large-display">Inside: <span id="inside_temp"></span>°C
         <span class="slope">(<span id="inside_temp_change_slope" class="slope"></span>/h)</span>,
-        <span id="inside_humidity"></span>% humidity</div>
+        <span id="inside_humidity"></span>% humidity,
+        <span id="power_on_percent"></span>% power on,
+        <span id="power_on_minutes"></span> minutes
+    </div>
     <div class="large-display">Desired: <span id="desired_temp"></span>°C
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(1)"><span class="big-arrow">↑</span> 1°</button>
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-1)"><span class="big-arrow">↓</span> 1°</button>
