@@ -1,8 +1,10 @@
 interface Sketch {
   setStateRecords: ([]) => void
+  getVisibleStateRecords: () => [State]
 }
 
 interface State {
+  time:             number
   inside_temp:      number
   desired_temp:     number
   outside_temp:     number
@@ -64,18 +66,7 @@ class ThermoClient {
     sset('outside_humidity', 0)
     sset('desired_temp',     1)
 
-    let heater_count = 0
-    let seconds = 0
-    if (this.stateRecords.length >= 2) {
-      for (let i = 1; i < this.stateRecords.length; i++) {
-        if (this.stateRecords[i-1].heater_is_on) {
-          heater_count++
-          seconds += this.stateRecords[i].time - this.stateRecords[i-1].time
-        }
-      }
-    }
-    document.getElementById("power_on_percent").textContent = (heater_count / this.stateRecords.length * 100).toFixed(2)
-    document.getElementById("power_on_minutes").textContent = (seconds / 60).toFixed(1)
+    this.calculateAndShowHeaterOnValues()
 
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
 
@@ -93,6 +84,23 @@ class ThermoClient {
       img.classList.add('weather-img')
       mwElem.appendChild(img)
     });
+  }
+
+  private calculateAndShowHeaterOnValues() {
+    let heater_count = 0
+    let seconds = 0
+    const visibleStateRecords = this.sketch.getVisibleStateRecords()
+    if (visibleStateRecords.length >= 2) {
+      for (let i = 1; i < visibleStateRecords.length; i++) {
+        if (visibleStateRecords[i - 1].heater_is_on) {
+          heater_count++
+          seconds += visibleStateRecords[i].time - visibleStateRecords[i - 1].time
+        }
+      }
+    }
+    document.getElementById("power_on_percent").textContent =
+      (heater_count > 0 ? (heater_count / visibleStateRecords.length * 100) : 0).toFixed(2)
+    document.getElementById("power_on_minutes").textContent = (seconds / 60).toFixed(0)
   }
 
   adjustTemp(amount: number) {
@@ -131,8 +139,9 @@ class ThermoClient {
     this.showingOutsideTemp = show
   }
 
-  private zoom() {
+  zoom() {
     this.sliceSecs = Number(this.inputElement('zoom').value)
+    this.calculateAndShowHeaterOnValues()
   }
 
   private visibilityChanged(visible) {
@@ -178,5 +187,9 @@ class ThermoClient {
     const xs = recentStates.map(state => (state.time - firstTime) / 3600)
     const ys = recentStates.map(state => fieldFromState(state) - firstValue)
     return slope(ys, xs)
+  }
+
+  sketchIsReady() {
+    this.calculateAndShowHeaterOnValues()
   }
 }

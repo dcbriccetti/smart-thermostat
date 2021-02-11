@@ -36,18 +36,7 @@ class ThermoClient {
         sset('inside_humidity', 0);
         sset('outside_humidity', 0);
         sset('desired_temp', 1);
-        let heater_count = 0;
-        let seconds = 0;
-        if (this.stateRecords.length >= 2) {
-            for (let i = 1; i < this.stateRecords.length; i++) {
-                if (this.stateRecords[i - 1].heater_is_on) {
-                    heater_count++;
-                    seconds += this.stateRecords[i].time - this.stateRecords[i - 1].time;
-                }
-            }
-        }
-        document.getElementById("power_on_percent").textContent = (heater_count / this.stateRecords.length * 100).toFixed(2);
-        document.getElementById("power_on_minutes").textContent = (seconds / 60).toFixed(1);
+        this.calculateAndShowHeaterOnValues();
         set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`);
         const arrow = (value, decimals) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(decimals);
         set('outside_temp_change_slope', arrow(this.change_slope(state => state.outside_temp, 30), 1));
@@ -62,6 +51,22 @@ class ThermoClient {
             img.classList.add('weather-img');
             mwElem.appendChild(img);
         });
+    }
+    calculateAndShowHeaterOnValues() {
+        let heater_count = 0;
+        let seconds = 0;
+        const visibleStateRecords = this.sketch.getVisibleStateRecords();
+        if (visibleStateRecords.length >= 2) {
+            for (let i = 1; i < visibleStateRecords.length; i++) {
+                if (visibleStateRecords[i - 1].heater_is_on) {
+                    heater_count++;
+                    seconds += visibleStateRecords[i].time - visibleStateRecords[i - 1].time;
+                }
+            }
+        }
+        document.getElementById("power_on_percent").textContent =
+            (heater_count > 0 ? (heater_count / visibleStateRecords.length * 100) : 0).toFixed(2);
+        document.getElementById("power_on_minutes").textContent = (seconds / 60).toFixed(0);
     }
     adjustTemp(amount) {
         fetch('change_temperature', {
@@ -95,6 +100,7 @@ class ThermoClient {
     }
     zoom() {
         this.sliceSecs = Number(this.inputElement('zoom').value);
+        this.calculateAndShowHeaterOnValues();
     }
     visibilityChanged(visible) {
         const rs = this.eventSource.readyState;
@@ -137,6 +143,9 @@ class ThermoClient {
         const ys = recentStates.map(state => fieldFromState(state) - firstValue);
         return slope(ys, xs);
     }
+    sketchIsReady() {
+        this.calculateAndShowHeaterOnValues();
+    }
 }
 ///<reference path="thermoClient.ts"/>
 const thermoSketch = new p5(p => {
@@ -145,6 +154,20 @@ const thermoSketch = new p5(p => {
         const vis = document.querySelector('#visualization');
         p.createCanvas(vis.offsetWidth, vis.offsetHeight).parent('visualization');
     };
+    let timeToXFn;
+    function getVisibleStateRecords() {
+        // Find leftmost visible record, so we can draw from left to right
+        if (timeToXFn === undefined)
+            return []; // Can’t run until draw has run once to compute the number of visible records
+        let leftmost_visible_record_index = 0;
+        for (let i = stateRecords.length - 1; i >= 0; --i) {
+            if (timeToXFn(stateRecords[i].time) < 0) {
+                leftmost_visible_record_index = i;
+                break;
+            }
+        }
+        return stateRecords.slice(leftmost_visible_record_index);
+    }
     p.draw = () => {
         p.frameRate(0.5);
         p.background('#e0e0e0');
@@ -160,15 +183,11 @@ const thermoSketch = new p5(p => {
             const pixelsFromEnd = secondsFromEnd / thermoClient.sliceSecs;
             return xRight - pixelsFromEnd;
         }
-        // Find leftmost visible record, so we can draw from left to right
-        let leftmost_visible_record_index = 0;
-        for (let i = stateRecords.length - 1; i >= 0; --i) {
-            if (timeToX(stateRecords[i].time) < 0) {
-                leftmost_visible_record_index = i;
-                break;
-            }
+        if (timeToXFn === undefined) {
+            timeToXFn = timeToX;
+            thermoClient.sketchIsReady();
         }
-        const visibleStateRecords = stateRecords.slice(leftmost_visible_record_index);
+        const visibleStateRecords = getVisibleStateRecords();
         const minOrMax = (reduce_fn, initial_value) => visibleStateRecords.reduce(reduce_fn, initial_value);
         const createTempReduceFn = minMaxFn => (a, c) => {
             const temps = [a, c.inside_temp];
@@ -242,6 +261,7 @@ const thermoSketch = new p5(p => {
         }
     };
     p.setStateRecords = records => stateRecords = records;
+    p.getVisibleStateRecords = getVisibleStateRecords;
 });
 const thermoClient = new ThermoClient(thermoSketch);
 function slope(ys, xs) {

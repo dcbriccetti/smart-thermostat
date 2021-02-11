@@ -10,6 +10,23 @@ const thermoSketch = new p5(p => {
     p.createCanvas(vis.offsetWidth, vis.offsetHeight).parent('visualization')
   }
 
+  let timeToXFn
+
+  function getVisibleStateRecords() {
+    // Find leftmost visible record, so we can draw from left to right
+    if (timeToXFn === undefined) return []  // Can’t run until draw has run once to compute the number of visible records
+
+    let leftmost_visible_record_index = 0
+    for (let i = stateRecords.length - 1; i >= 0; --i) {
+      if (timeToXFn(stateRecords[i].time) < 0) {
+        leftmost_visible_record_index = i
+        break
+      }
+    }
+
+    return stateRecords.slice(leftmost_visible_record_index)
+  }
+
   p.draw = () => {
     p.frameRate(0.5)
     p.background('#e0e0e0')
@@ -29,16 +46,12 @@ const thermoSketch = new p5(p => {
       return xRight - pixelsFromEnd
     }
 
-    // Find leftmost visible record, so we can draw from left to right
-    let leftmost_visible_record_index = 0
-    for (let i = stateRecords.length - 1; i >= 0; --i) {
-      if (timeToX(stateRecords[i].time) < 0) {
-        leftmost_visible_record_index = i
-        break
-      }
+    if (timeToXFn === undefined) {
+      timeToXFn = timeToX
+      thermoClient.sketchIsReady()
     }
 
-    const visibleStateRecords = stateRecords.slice(leftmost_visible_record_index)
+    const visibleStateRecords = getVisibleStateRecords()
 
     const minOrMax = (reduce_fn, initial_value) => visibleStateRecords.reduce(reduce_fn, initial_value)
     const createTempReduceFn = minMaxFn => (a, c) => {
@@ -124,6 +137,8 @@ const thermoSketch = new p5(p => {
   }
 
   p.setStateRecords = records => stateRecords = records
+
+  p.getVisibleStateRecords = getVisibleStateRecords
 })
 
 const thermoClient = new ThermoClient(thermoSketch)
