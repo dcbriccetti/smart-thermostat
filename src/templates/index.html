@@ -13,12 +13,16 @@
         }
 
         .large-display {
-            font-size: 150%;
+            font-size: 130%;
         }
 
         .big-arrow {
             font-size: 150%;
             font-weight: bold;
+        }
+
+        .slope {
+            font-size: 90%;
         }
 
         #schedule-group, #zoom-group {
@@ -41,16 +45,21 @@
 <div class="container-fluid">
     <h2>Smart Thermostat</h2>
     <div class="large-display">
-        {{ weather_query }}:<span id="main_weather"></span> <span id="outside_temp"></span> °C,
-        <span id="pressure"></span> hPa, <span id="outside_humidity"></span>%,
+        {{ weather_query }}:<span id="main_weather"></span> <span id="outside_temp"></span>°C
+        <span class="slope">(<span id="outside_temp_change_slope"></span>/h)</span>,
+        <span id="pressure"></span> hPa,
+        <span class="slope">(<span id="pressure_change_slope"></span>/h)</span>,
+        <span id="outside_humidity"></span>%,
         Wind <span id="wind_dir"></span>° at <span id="wind_speed"></span><span id="gust"></span> k/h
     </div>
-    <div class="large-display">Inside: <span id="inside_temp"></span> °C, <span id="inside_humidity"></span>% humidity</div>
-    <div class="large-display">Desired: <span id="desired_temp"></span> °C
-        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(1)"><span class="big-arrow">↑</span> 1 °</button>
-        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-1)"><span class="big-arrow">↓</span> 1 °</button>
-        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(0.1)">↑ 0.1 °</button>
-        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-0.1)">↓ 0.1 °</button>
+    <div class="large-display">Inside: <span id="inside_temp"></span>°C
+        <span class="slope">(<span id="inside_temp_change_slope" class="slope"></span>/h)</span>,
+        <span id="inside_humidity"></span>% humidity</div>
+    <div class="large-display">Desired: <span id="desired_temp"></span>°C
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(1)"><span class="big-arrow">↑</span> 1°</button>
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-1)"><span class="big-arrow">↓</span> 1°</button>
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(0.1)">↑ 0.1°</button>
+        <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(-0.1)">↓ 0.1°</button>
         <label style="margin-left: .2em;"><input id='fan' type="checkbox" class="btn btn-primary"
                onclick="thermoClient.activateFan(document.querySelector('#fan').checked)"/>
         Fan</label>
@@ -63,19 +72,13 @@
         <label style="margin-left: .2em;">
             <input checked id='show-desired-temp' type="checkbox" class="btn btn-primary"
                 onclick="thermoClient.showDesiredTemp(document.querySelector('#show-desired-temp').checked)"/>
-            Desired Temperature
-        </label>
-        <label style="margin-left: .2em;">
-            <input checked id='show-pressure' type="checkbox" class="btn btn-primary"
-                   onclick="thermoClient.showPressure(document.querySelector('#show-pressure').checked)"/>
-            Pressure
+            Desired Temp.
         </label>
         <label style="margin-left: .2em;">
             <input checked id='show-outside-temp' type="checkbox" class="btn btn-primary"
-                   onclick="thermoClient.showOutsideTemp(document.querySelector('#show-outside-temp').checked)"/>
-            Outside Temperature
+                onclick="thermoClient.showOutsideTemp(document.querySelector('#show-outside-temp').checked)"/>
+            Outside Temp.
         </label>
-        
     </div>
     <div id='visualization'></div>
     <div>

@@ -21,24 +21,28 @@ class WeatherObservation(NamedTuple):
 
 def outside_weather(weather_query='q=Oakland') -> Optional[WeatherObservation]:
     url = f'http://api.openweathermap.org/data/2.5/weather?{weather_query}&units=metric&APPID={key}'
-    response: Response = requests.get(url)
-    if response.status_code == 200:
-        weather: Dict[str, Any] = response.json()
-        main: Dict[str, Any] = weather['main']
-        wind: Dict[str, Any] = weather['wind']
-        return WeatherObservation(
-            int(time()),
-            float(main['temp']),
-            _mps_to_kph(float(wind['speed'])),
-            _mps_to_kph(float(wind.get('gust', 0))),
-            int(wind['deg']),
-            float(main['pressure']),
-            int(main['humidity']),
-            weather['weather'],
-        )
-    else:
+    try:
+        response: Response = requests.get(url)
+        if response.status_code == 200:
+            weather: Dict[str, Any] = response.json()
+            main: Dict[str, Any] = weather['main']
+            wind: Dict[str, Any] = weather['wind']
+
+            return WeatherObservation(
+                int(time()),
+                float(main['temp']),
+                _mps_to_kph(float(wind['speed'])),
+                _mps_to_kph(float(wind.get('gust', 0))),
+                int(wind['deg']),
+                float(main['pressure']),
+                int(main['humidity']),
+                weather['weather'],
+            )
         print(response.status_code, response.text)
-        return None
+    except requests.RequestException as ex:
+        print(ex)
+
+    return None
 
 
 def _mps_to_kph(meters_per_second: float) -> float:

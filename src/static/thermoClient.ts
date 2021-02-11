@@ -1,6 +1,5 @@
 interface Sketch {
-  addAllStateRecords: (string) => void
-  addStateRecord:     (string) => void
+  setStateRecords: ([]) => void
 }
 
 interface State {
@@ -17,14 +16,15 @@ interface State {
   }]
   inside_humidity:  number
   outside_humidity: number
+  heater_is_on:     boolean
 }
 
 class ThermoClient {
   public sliceSecs: number
-  public showingDesiredTemp: boolean = true;
-  public showingPressure: boolean = true;
-  public showingOutsideTemp: boolean = true;
+  public showingDesiredTemp = true
+  public showingOutsideTemp = true
   private eventSource: EventSource
+  private stateRecords = [] // Shared with sketch.ts
 
   constructor(private sketch: Sketch) {
     this.sliceSecs = 15
@@ -34,17 +34,24 @@ class ThermoClient {
   }
 
   private setUpEventProcessing() {
-    fetch('all-status').then(r => r.json()).then(j => this.sketch.addAllStateRecords(j))
-    const source = this.eventSource = new EventSource('/status')
-    console.log(`Created EventSource. readyState: ${source.readyState}`)
-    source.onopen    = parm  => console.log(parm, source.readyState)
-    source.onmessage = event => this.processEvent(JSON.parse(event.data))
-    source.onerror   = error => console.error('Status events error', error, source.readyState)
+    fetch('all-status').then(response => response.json()).then((stateRecords: [{}]) => {
+      this.stateRecords = stateRecords
+      this.sketch.setStateRecords(stateRecords)
+
+      const source = this.eventSource = new EventSource('/status')
+      console.log(`Created EventSource. readyState: ${source.readyState}`)
+      source.onopen    = parm  => console.log(parm, source.readyState)
+      source.onmessage = event => {
+        const state = JSON.parse(event.data)
+        this.stateRecords.push(state)
+        this.processEvent(state)
+      }
+      source.onerror   = error => console.error('Status events error', error, source.readyState)
+    })
   }
 
   private processEvent(state: State) {
-    console.log('event arrived')
-    this.sketch.addStateRecord(state)
+    console.log('processEvent')
     const set = (id: string, text: any) => document.getElementById(id).textContent = text
     const sset = (id: string, decimalPlaces: number) => set(id, state[id].toFixed(decimalPlaces))
 
@@ -58,6 +65,11 @@ class ThermoClient {
     sset('desired_temp',     1)
 
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
+
+    const arrow = (value: number, decimals: number) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(decimals)
+    set('outside_temp_change_slope', arrow(this.change_slope(state => state.outside_temp, 30), 1))
+    set('inside_temp_change_slope', arrow(this.inside_temp_change_slope(), 1))
+    set('pressure_change_slope', arrow(this.change_slope(state => state.pressure, 6 * 60), 2))
 
     const mwElem = document.getElementById('main_weather')
     mwElem.innerHTML = ''
@@ -101,10 +113,6 @@ class ThermoClient {
   showDesiredTemp(show: boolean) {
     this.showingDesiredTemp = show
   }
-  
-  showPressure(show: boolean) {
-    this.showingPressure = show
-  }
 
   showOutsideTemp(show: boolean) {
     this.showingOutsideTemp = show
@@ -124,5 +132,38 @@ class ThermoClient {
 
   private inputElement(selector: string) {
     return <HTMLInputElement>document.getElementById(selector)
+  }
+
+  private inside_temp_change_slope(): number {
+    const numRecords = this.stateRecords.length
+    if (numRecords < 2) return 0
+
+    const numRecentRecords = Math.min(30, numRecords)
+    let rightmostHeatOn: number // distance from the rightmost sample
+    for (let i = 0; i < numRecentRecords; ++i) {
+      if (this.stateRecords[numRecords - 1 - i].heater_is_on) {
+        rightmostHeatOn = i
+        break
+      }
+    }
+    const marginForHeatAndThermometerDelay = 5
+    let numRequested = rightmostHeatOn === undefined ? numRecentRecords :
+      Math.max(3, rightmostHeatOn - marginForHeatAndThermometerDelay)
+    console.log(`Using ${numRequested} samples for indoor temperature change slope calculation`)
+    return this.change_slope(state => state.inside_temp, numRequested)
+  }
+
+  private change_slope(fieldFromState: (state) => number, numRecordsInSlope: number): number {
+    const numRecords = this.stateRecords.length
+    const numRecentRecords = Math.min(numRecordsInSlope, numRecords)
+    if (numRecentRecords < 2) return 0
+
+    const firstState = this.stateRecords[numRecords - numRecentRecords]
+    const firstTime = firstState.time
+    const firstValue = fieldFromState(firstState)
+    const recentStates = this.stateRecords.slice(numRecords - numRecentRecords, numRecords)
+    const xs = recentStates.map(state => (state.time - firstTime) / 3600)
+    const ys = recentStates.map(state => fieldFromState(state) - firstValue)
+    return slope(ys, xs)
   }
 }

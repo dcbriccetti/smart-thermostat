@@ -1,6 +1,5 @@
 /venv/
 /.idea/
 /smart-thermostat.iml
-/src/static/app.js
-/src/static/app.js.map
 /thermostat.db
+*.pyc

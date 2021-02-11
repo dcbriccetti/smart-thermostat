@@ -100,15 +100,10 @@ class ThermoController:
 
     def _manage_outside_weather(self):
         if ow := outside_weather(self.weather_query):
-            self.outside_weather = {
-                'outside_temp'    : ow.temperature,
-                'wind_dir'        : ow.wind_dir,
-                'wind_speed'      : ow.wind_speed,
-                'gust'            : ow.gust,
-                'pressure'        : ow.pressure,
-                'outside_humidity': ow.humidity,
-                'main_weather'    : ow.main_weather,
-            }
+            keys = 'wind_dir wind_speed gust pressure main_weather'.split(' ')
+            ow_dict = {key: ow.__getattribute__(key) for key in keys}
+            ow_dict.update(dict(outside_temp=ow.temperature, outside_humidity=ow.humidity))
+            self.outside_weather = ow_dict
         else:
             print('Unable to get weather')
 

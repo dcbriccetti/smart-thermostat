@@ -48,10 +48,10 @@ db.create_all()
 
 observations = Observation.query.order_by(Observation.time).all()
 
-controller = ThermoController(WEATHER_QUERY, Sensor(), observations,
+thermoController = ThermoController(WEATHER_QUERY, Sensor(), observations,
     heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
     fan=Relay('Fan', FAN_PIN), desired_temp=DEFAULT_DESIRED_TEMP)
-scheduler = Scheduler(controller)
+scheduler = Scheduler(thermoController)
 
 @app.route('/')
 def index():
@@ -62,25 +62,25 @@ def index():
 
 @app.route('/change_temperature', methods=('POST',))
 def change_temperature():
-    controller.change_temperature(float(request.get_data()))
+    thermoController.change_temperature(float(request.get_data()))
     return ''
 
 
 @app.route('/set_temperature', methods=('PUT',))
 def set_temperature():
-    controller.set_temperature(float(request.get_data()))
+    thermoController.set_temperature(float(request.get_data()))
     return ''
 
 
 @app.route('/activate_fan', methods=('PUT',))
 def activate_fan():
-    controller.activate_fan(request.get_data() == b'true')
+    thermoController.activate_fan(request.get_data() == b'true')
     return ''
 
 
 @app.route('/enable_cool', methods=('PUT',))
 def enable_cool():
-    controller.enable_cool(request.get_data() == b'true')
+    thermoController.enable_cool(request.get_data() == b'true')
     return ''
 
 
@@ -93,7 +93,7 @@ def schedule():
 @app.route('/status')
 def status():
     stream_state_queue = Queue(maxsize=5)
-    controller.add_state_queue(stream_state_queue)
+    thermoController.add_state_queue(stream_state_queue)
 
     def event_stream():
         while True:
@@ -105,28 +105,29 @@ def status():
 
 @app.route('/all-status')
 def all_status():
-    return jsonify(controller.status_history)
+    return jsonify(thermoController.status_history)
 
 
 def _background_thread():
     while True:
         scheduler.update()
-        if state := controller.update():
+        if state := thermoController.update():
             print(state)
-            ob = Observation(
-                time=datetime.fromtimestamp(state['time']),
-                inside_temp=state['inside_temp'],
-                outside_temp=state['outside_temp'],
-                desired_temp=state['desired_temp'],
-                inside_humidity=state['inside_humidity'],
-                outside_humidity=state['outside_humidity'],
-                pressure=state['pressure'],
-                weather_codes=', '.join([str(mw['id']) for mw in state['main_weather']]),
-                heater_is_on=state['heater_is_on']
-            )
-            db.session.add(ob)
-            db.session.commit()
+            if 'outside_temp' in state:
+                save_observation(state)
         sleep(.1)
+
+
+def save_observation(state):
+    keys = 'inside_temp outside_temp desired_temp inside_humidity outside_humidity pressure heater_is_on'.split(' ')
+    args_dict = {key: state[key] for key in keys}
+    ob = Observation(
+        time=datetime.fromtimestamp(state['time']),
+        weather_codes=', '.join([str(mw['id']) for mw in state['main_weather']]),
+        **args_dict
+    )
+    db.session.add(ob)
+    db.session.commit()
 
 
 threading.Thread(target=_background_thread).start()

@@ -2,24 +2,30 @@ class ThermoClient {
     constructor(sketch) {
         this.sketch = sketch;
         this.showingDesiredTemp = true;
-        this.showingPressure = true;
         this.showingOutsideTemp = true;
+        this.stateRecords = []; // Shared with sketch.ts
         this.sliceSecs = 15;
         this.inputElement('zoom').value = this.sliceSecs.toString();
         this.setUpEventProcessing();
         document.addEventListener("visibilitychange", () => this.visibilityChanged(!document.hidden), false);
     }
     setUpEventProcessing() {
-        fetch('all-status').then(r => r.json()).then(j => this.sketch.addAllStateRecords(j));
-        const source = this.eventSource = new EventSource('/status');
-        console.log(`Created EventSource. readyState: ${source.readyState}`);
-        source.onopen = parm => console.log(parm, source.readyState);
-        source.onmessage = event => this.processEvent(JSON.parse(event.data));
-        source.onerror = error => console.error('Status events error', error, source.readyState);
+        fetch('all-status').then(response => response.json()).then((stateRecords) => {
+            this.stateRecords = stateRecords;
+            this.sketch.setStateRecords(stateRecords);
+            const source = this.eventSource = new EventSource('/status');
+            console.log(`Created EventSource. readyState: ${source.readyState}`);
+            source.onopen = parm => console.log(parm, source.readyState);
+            source.onmessage = event => {
+                const state = JSON.parse(event.data);
+                this.stateRecords.push(state);
+                this.processEvent(state);
+            };
+            source.onerror = error => console.error('Status events error', error, source.readyState);
+        });
     }
     processEvent(state) {
-        console.log('event arrived');
-        this.sketch.addStateRecord(state);
+        console.log('processEvent');
         const set = (id, text) => document.getElementById(id).textContent = text;
         const sset = (id, decimalPlaces) => set(id, state[id].toFixed(decimalPlaces));
         sset('outside_temp', 1);
@@ -31,6 +37,10 @@ class ThermoClient {
         sset('outside_humidity', 0);
         sset('desired_temp', 1);
         set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`);
+        const arrow = (value, decimals) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(decimals);
+        set('outside_temp_change_slope', arrow(this.change_slope(state => state.outside_temp, 30), 1));
+        set('inside_temp_change_slope', arrow(this.inside_temp_change_slope(), 1));
+        set('pressure_change_slope', arrow(this.change_slope(state => state.pressure, 6 * 60), 2));
         const mwElem = document.getElementById('main_weather');
         mwElem.innerHTML = '';
         state.main_weather.forEach(mw => {
@@ -68,9 +78,6 @@ class ThermoClient {
     showDesiredTemp(show) {
         this.showingDesiredTemp = show;
     }
-    showPressure(show) {
-        this.showingPressure = show;
-    }
     showOutsideTemp(show) {
         this.showingOutsideTemp = show;
     }
@@ -87,6 +94,37 @@ class ThermoClient {
     inputElement(selector) {
         return document.getElementById(selector);
     }
+    inside_temp_change_slope() {
+        const numRecords = this.stateRecords.length;
+        if (numRecords < 2)
+            return 0;
+        const numRecentRecords = Math.min(30, numRecords);
+        let rightmostHeatOn; // distance from the rightmost sample
+        for (let i = 0; i < numRecentRecords; ++i) {
+            if (this.stateRecords[numRecords - 1 - i].heater_is_on) {
+                rightmostHeatOn = i;
+                break;
+            }
+        }
+        const marginForHeatAndThermometerDelay = 5;
+        let numRequested = rightmostHeatOn === undefined ? numRecentRecords :
+            Math.max(3, rightmostHeatOn - marginForHeatAndThermometerDelay);
+        console.log(`Using ${numRequested} samples for indoor temperature change slope calculation`);
+        return this.change_slope(state => state.inside_temp, numRequested);
+    }
+    change_slope(fieldFromState, numRecordsInSlope) {
+        const numRecords = this.stateRecords.length;
+        const numRecentRecords = Math.min(numRecordsInSlope, numRecords);
+        if (numRecentRecords < 2)
+            return 0;
+        const firstState = this.stateRecords[numRecords - numRecentRecords];
+        const firstTime = firstState.time;
+        const firstValue = fieldFromState(firstState);
+        const recentStates = this.stateRecords.slice(numRecords - numRecentRecords, numRecords);
+        const xs = recentStates.map(state => (state.time - firstTime) / 3600);
+        const ys = recentStates.map(state => fieldFromState(state) - firstValue);
+        return slope(ys, xs);
+    }
 }
 ///<reference path="thermoClient.ts"/>
 const thermoSketch = new p5(p => {
@@ -102,26 +140,38 @@ const thermoSketch = new p5(p => {
         p.scale(1, -1);
         if (stateRecords.length === 0)
             return;
-        const minOrMax = (reduce_fn, initial_value) => stateRecords.reduce(reduce_fn, initial_value);
-        const createTempReduceFn = minMaxFn => (a, c) => minMaxFn(a, c.inside_temp, c.desired_temp, c.outside_temp);
-        const createPressureReduceFn = minMaxFn => (a, c) => minMaxFn(a, c.pressure);
-        const y_axis_margin_degrees = 1;
-        const y_axis_margin_hPa = 10;
-        const temp_min = minOrMax(createTempReduceFn(Math.min), 50) - y_axis_margin_degrees;
-        const temp_max = minOrMax(createTempReduceFn(Math.max), -50) + y_axis_margin_degrees;
-        const pressure_min = minOrMax(createPressureReduceFn(Math.min), 1500) - y_axis_margin_hPa;
-        const pressure_max = minOrMax(createPressureReduceFn(Math.max), 0) + y_axis_margin_hPa;
-        const chartYBase = 20;
         let timeStart = stateRecords[0].time;
         let timeEnd = p.int(Date.now() / 1000);
         let xRight = p.width - 20;
-        const tempToY = temp => p.map(temp, temp_min, temp_max, chartYBase, p.height);
-        const pressureToY = pressure => p.map(pressure, pressure_min, pressure_max, chartYBase, p.height);
         function timeToX(time) {
             const secondsFromEnd = timeEnd - time;
             const pixelsFromEnd = secondsFromEnd / thermoClient.sliceSecs;
             return xRight - pixelsFromEnd;
         }
+        // Find leftmost visible record, so we can draw from left to right
+        let leftmost_visible_record_index = 0;
+        for (let i = stateRecords.length - 1; i >= 0; --i) {
+            if (timeToX(stateRecords[i].time) < 0) {
+                leftmost_visible_record_index = i;
+                break;
+            }
+        }
+        const visibleStateRecords = stateRecords.slice(leftmost_visible_record_index);
+        const minOrMax = (reduce_fn, initial_value) => visibleStateRecords.reduce(reduce_fn, initial_value);
+        const createTempReduceFn = minMaxFn => (a, c) => {
+            const temps = [a, c.inside_temp];
+            if (thermoClient.showingDesiredTemp)
+                temps.push(c.desired_temp);
+            if (thermoClient.showingOutsideTemp)
+                temps.push(c.outside_temp);
+            return minMaxFn(...temps);
+        };
+        const y_axis_margin_degrees = 1;
+        const y_axis_margin_hPa = 10;
+        const temp_min = minOrMax(createTempReduceFn(Math.min), 50) - y_axis_margin_degrees;
+        const temp_max = minOrMax(createTempReduceFn(Math.max), -50) + y_axis_margin_degrees;
+        const chartYBase = 20;
+        const tempToY = temp => p.map(temp, temp_min, temp_max, chartYBase, p.height);
         function drawVertGridLines() {
             const gridLow = Math.floor(temp_min);
             const gridHigh = Math.ceil(temp_max);
@@ -164,24 +214,12 @@ const thermoSketch = new p5(p => {
         }
         drawVertGridLines();
         drawHorzGridLines();
-        // Find leftmost visible record, so we can draw from left to right
-        let leftmost_visible_record_index = 0;
-        for (let i = stateRecords.length - 1; i >= 0; --i) {
-            if (timeToX(stateRecords[i].time) < 0) {
-                leftmost_visible_record_index = i;
-                break;
-            }
-        }
-        for (const rec of stateRecords.slice(leftmost_visible_record_index)) {
+        for (const rec of visibleStateRecords) {
             const x = timeToX(rec.time);
             p.strokeWeight(3);
             if (thermoClient.showingDesiredTemp) {
                 p.stroke('green');
                 p.point(x, tempToY(rec.desired_temp));
-            }
-            if (thermoClient.showingPressure) {
-                p.stroke('blue');
-                p.point(x, pressureToY(rec.pressure));
             }
             if (thermoClient.showingOutsideTemp) {
                 p.stroke(255, 190, 0);
@@ -191,8 +229,25 @@ const thermoSketch = new p5(p => {
             p.point(x, tempToY(rec.inside_temp));
         }
     };
-    p.addStateRecord = record => stateRecords.push(record);
-    p.addAllStateRecords = records => stateRecords = records;
+    p.setStateRecords = records => stateRecords = records;
 });
 const thermoClient = new ThermoClient(thermoSketch);
+function slope(ys, xs) {
+    const n = ys.length;
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumXX = 0;
+    let sumYY = 0;
+    for (var i = 0; i < ys.length; i++) {
+        const x = xs[i];
+        const y = ys[i];
+        sumX += x;
+        sumY += y;
+        sumXY += x * y;
+        sumXX += x * x;
+        sumYY += y * y;
+    }
+    return (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+}
 //# sourceMappingURL=app.js.map
