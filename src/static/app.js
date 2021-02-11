@@ -239,7 +239,7 @@ function slope(ys, xs) {
     let sumXY = 0;
     let sumXX = 0;
     let sumYY = 0;
-    for (var i = 0; i < ys.length; i++) {
+    for (let i = 0; i < n; i++) {
         const x = xs[i];
         const y = ys[i];
         sumX += x;
