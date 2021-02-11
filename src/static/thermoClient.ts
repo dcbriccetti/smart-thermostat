@@ -64,6 +64,19 @@ class ThermoClient {
     sset('outside_humidity', 0)
     sset('desired_temp',     1)
 
+    let heater_count = 0
+    let seconds = 0
+    if (this.stateRecords.length >= 2) {
+      for (let i = 1; i < this.stateRecords.length; i++) {
+        if (this.stateRecords[i-1].heater_is_on) {
+          heater_count++
+          seconds += this.stateRecords[i].time - this.stateRecords[i-1].time
+        }
+      }
+    }
+    document.getElementById("power_on_percent").textContent = (heater_count / this.stateRecords.length * 100).toFixed(2)
+    document.getElementById("power_on_minutes").textContent = (seconds / 60).toFixed(1)
+
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
 
     const arrow = (value: number, decimals: number) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(decimals)
