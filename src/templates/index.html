@@ -21,6 +21,10 @@
             font-weight: bold;
         }
 
+        .slope {
+            font-size: 90%;
+        }
+
         #schedule-group, #zoom-group {
             margin-top: 0.7em;
             width: 20em;
@@ -42,14 +46,14 @@
     <h2>Smart Thermostat</h2>
     <div class="large-display">
         {{ weather_query }}:<span id="main_weather"></span> <span id="outside_temp"></span>°C
-        (<span id="outside_temp_change_slope"></span>°/h),
+        <span class="slope">(<span id="outside_temp_change_slope"></span>/h)</span>,
         <span id="pressure"></span> hPa,
-        (<span id="pressure_change_slope"></span>/h),
+        <span class="slope">(<span id="pressure_change_slope"></span>/h)</span>,
         <span id="outside_humidity"></span>%,
         Wind <span id="wind_dir"></span>° at <span id="wind_speed"></span><span id="gust"></span> k/h
     </div>
     <div class="large-display">Inside: <span id="inside_temp"></span>°C
-        (<span id="inside_temp_change_slope"></span>°/h),
+        <span class="slope">(<span id="inside_temp_change_slope" class="slope"></span>/h)</span>,
         <span id="inside_humidity"></span>% humidity</div>
     <div class="large-display">Desired: <span id="desired_temp"></span>°C
         <button type="button" class="btn btn-primary" onclick="thermoClient.adjustTemp(1)"><span class="big-arrow">↑</span> 1°</button>

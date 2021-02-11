@@ -40,7 +40,7 @@ class ThermoClient {
         const arrow = (value, decimals) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(decimals);
         set('outside_temp_change_slope', arrow(this.change_slope(state => state.outside_temp, 30), 1));
         set('inside_temp_change_slope', arrow(this.inside_temp_change_slope(), 1));
-        set('pressure_change_slope', arrow(this.change_slope(state => state.pressure, 120), 2));
+        set('pressure_change_slope', arrow(this.change_slope(state => state.pressure, 6 * 60), 2));
         const mwElem = document.getElementById('main_weather');
         mwElem.innerHTML = '';
         state.main_weather.forEach(mw => {
