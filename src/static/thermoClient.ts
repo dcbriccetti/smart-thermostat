@@ -66,9 +66,10 @@ class ThermoClient {
 
     set('gust', state.gust == 0 ? '' : ` (g. ${state.gust.toFixed(0)})`)
 
-    const arrow = (value: number) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(2)
-    set('outside_temp_change_slope', arrow(this.outside_temp_change_slope()))
-    set('inside_temp_change_slope', arrow(this.inside_temp_change_slope()))
+    const arrow = (value: number, decimals: number) => (value < 0 ? '↓' : '↑') + Math.abs(value).toFixed(decimals)
+    set('outside_temp_change_slope', arrow(this.change_slope(state => state.outside_temp, 30), 1))
+    set('inside_temp_change_slope', arrow(this.inside_temp_change_slope(), 1))
+    set('pressure_change_slope', arrow(this.change_slope(state => state.pressure, 30), 2))
 
     const mwElem = document.getElementById('main_weather')
     mwElem.innerHTML = ''
@@ -149,24 +150,20 @@ class ThermoClient {
     let numRequested = rightmostHeatOn === undefined ? numRecentRecords :
       Math.max(3, rightmostHeatOn - marginForHeatAndThermometerDelay)
     console.log(`Using ${numRequested} samples for indoor temperature change slope calculation`)
-    return this.temp_change_slope(state => state.inside_temp, numRequested)
+    return this.change_slope(state => state.inside_temp, numRequested)
   }
 
-  private outside_temp_change_slope(): number {
-    return this.temp_change_slope(state => state.outside_temp, 30)
-  }
-
-  private temp_change_slope(fieldFromState: (state) => number, numRecordsInSlope: number): number {
+  private change_slope(fieldFromState: (state) => number, numRecordsInSlope: number): number {
     const numRecords = this.stateRecords.length
     const numRecentRecords = Math.min(numRecordsInSlope, numRecords)
     if (numRecentRecords < 2) return 0
 
     const firstState = this.stateRecords[numRecords - numRecentRecords]
     const firstTime = firstState.time
-    const firstTemp = fieldFromState(firstState)
+    const firstValue = fieldFromState(firstState)
     const recentStates = this.stateRecords.slice(numRecords - numRecentRecords, numRecords)
     const xs = recentStates.map(state => (state.time - firstTime) / 3600)
-    const ys = recentStates.map(state => fieldFromState(state) - firstTemp)
+    const ys = recentStates.map(state => fieldFromState(state) - firstValue)
     return slope(ys, xs)
   }
 }
