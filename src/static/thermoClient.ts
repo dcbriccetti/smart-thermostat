@@ -147,7 +147,7 @@ class ThermoClient {
     }
     const marginForHeatAndThermometerDelay = 5
     let numRequested = rightmostHeatOn === undefined ? numRecentRecords :
-      Math.max(2, rightmostHeatOn - marginForHeatAndThermometerDelay)
+      Math.max(3, rightmostHeatOn - marginForHeatAndThermometerDelay)
     console.log(`Using ${numRequested} samples for indoor temperature change slope calculation`)
     return this.temp_change_slope(state => state.inside_temp, numRequested)
   }
