@@ -198,7 +198,6 @@ const thermoSketch = new p5(p => {
             return minMaxFn(...temps);
         };
         const y_axis_margin_degrees = 1;
-        const y_axis_margin_hPa = 10;
         const temp_min = minOrMax(createTempReduceFn(Math.min), 50) - y_axis_margin_degrees;
         const temp_max = minOrMax(createTempReduceFn(Math.max), -50) + y_axis_margin_degrees;
         const chartYBase = 20;
