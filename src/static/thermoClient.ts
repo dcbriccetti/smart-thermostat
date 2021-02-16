@@ -87,20 +87,21 @@ class ThermoClient {
   }
 
   private calculateAndShowHeaterOnValues() {
-    let heater_count = 0
-    let seconds = 0
     const visibleStateRecords = this.sketch.getVisibleStateRecords()
-    if (visibleStateRecords.length >= 2) {
-      for (let i = 1; i < visibleStateRecords.length; i++) {
-        if (visibleStateRecords[i - 1].heater_is_on) {
-          heater_count++
-          seconds += visibleStateRecords[i].time - visibleStateRecords[i - 1].time
-        }
-      }
+    const numVis = visibleStateRecords.length
+    const minutesDiff = (start, end) => (visibleStateRecords[end].time - visibleStateRecords[start].time) / 60
+    let onMinutes = 0
+    let onPercent = 0
+    if (numVis >= 2) {
+      for (let i = 1; i < numVis; i++)
+        if (visibleStateRecords[i - 1].heater_is_on)
+          onMinutes += minutesDiff(i - 1, i)
+
+      const visibleMinutes = minutesDiff(0, numVis - 1)
+      onPercent = onMinutes / visibleMinutes * 100
     }
-    document.getElementById("power_on_percent").textContent =
-      (heater_count > 0 ? (heater_count / visibleStateRecords.length * 100) : 0).toFixed(2)
-    document.getElementById("power_on_minutes").textContent = (seconds / 60).toFixed(0)
+    document.getElementById("power_on_percent").textContent = onPercent.toFixed(1)
+    document.getElementById("power_on_minutes").textContent = onMinutes.toFixed(0)
   }
 
   adjustTemp(amount: number) {
