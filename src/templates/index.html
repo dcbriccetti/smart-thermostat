@@ -21,8 +21,8 @@
             font-weight: bold;
         }
 
-        .slope {
-            font-size: 90%;
+        .subordinate {
+            font-size: 80%;
         }
 
         #schedule-group, #zoom-group {
@@ -46,14 +46,14 @@
     <h2>Smart Thermostat</h2>
     <div class="large-display">
         {{ weather_query }}:<span id="main_weather"></span> <span id="outside_temp"></span>°C
-        <span class="slope">(<span id="outside_temp_change_slope"></span>/h)</span>,
+        <span class="subordinate">(<span id="outside_temp_change_slope"></span>/h)</span>,
         <span id="pressure"></span> mb
-        <span class="slope">(<span id="pressure_change_slope"></span>/h)</span>,
+        <span class="subordinate">(<span id="pressure_change_slope"></span>/h)</span>,
         <span id="outside_humidity"></span>%,
         Wind <span id="wind_dir"></span>° at <span id="wind_speed"></span><span id="gust"></span> k/h
     </div>
     <div class="large-display">Inside: <span id="inside_temp"></span>°C
-        <span class="slope">(<span id="inside_temp_change_slope" class="slope"></span>/h)</span>,
+        <span class="subordinate">(<span id="inside_temp_change_slope" class="subordinate"></span>/h)</span>,
         <span id="inside_humidity"></span>% humidity,
         power on <span id="power_on_percent"></span>%,
         <span id="power_on_minutes"></span> minutes
