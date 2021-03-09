@@ -33,6 +33,10 @@ class ThermoClient {
     this.inputElement('zoom').value = this.sliceSecs.toString()
     this.setUpEventProcessing()
     document.addEventListener("visibilitychange", () => this.visibilityChanged(!document.hidden), false)
+    document.querySelector('#show-desired-temp').addEventListener('change', (e) =>
+      thermoClient.showDesiredTemp((<HTMLInputElement>e.target).checked))
+    document.querySelector('#show-outside-temp').addEventListener('change', (e) =>
+      thermoClient.showOutsideTemp((<HTMLInputElement>e.target).checked))
   }
 
   private setUpEventProcessing() {
