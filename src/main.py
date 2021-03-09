@@ -33,16 +33,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../thermostat.db'
 db = SQLAlchemy(app)
 
 class Observation(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.DateTime)
-    inside_temp = db.Column(db.Float)
-    outside_temp = db.Column(db.Float)
-    desired_temp = db.Column(db.Float)
-    inside_humidity = db.Column(db.Float)
-    outside_humidity = db.Column(db.Float)
-    pressure = db.Column(db.Float)
-    weather_codes = db.Column(db.String)
-    heater_is_on = db.Column(db.Boolean)
+    id                  = db.Column(db.Integer, primary_key=True)
+    time                = db.Column(db.DateTime)
+    inside_temp         = db.Column(db.Float)
+    outside_temp        = db.Column(db.Float)
+    desired_temp        = db.Column(db.Float)
+    inside_humidity     = db.Column(db.Float)
+    outside_humidity    = db.Column(db.Float)
+    pressure            = db.Column(db.Float)
+    weather_codes       = db.Column(db.String)
+    heater_is_on        = db.Column(db.Boolean)
 
 db.create_all()
 
