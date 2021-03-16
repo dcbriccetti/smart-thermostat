@@ -4,7 +4,7 @@ import json
 import threading
 from datetime import datetime
 from queue import Queue
-from time import sleep
+from time import sleep, time
 
 from flask import Flask, jsonify, render_template, request, Response
 from flask_sqlalchemy import SQLAlchemy
@@ -46,7 +46,9 @@ class Observation(db.Model):
 
 db.create_all()
 
+t = time()
 observations = Observation.query.order_by(Observation.time).all()
+print(f'Past observations fetched from database in {(time() - t) * 1000:.3f} ms')
 
 thermoController = ThermoController(WEATHER_QUERY, Sensor(), observations,
     heater=Relay('Heat', HEAT_PIN), cooler=Relay('AC', COOL_PIN),
@@ -105,7 +107,7 @@ def status():
 
 @app.route('/all-status')
 def all_status():
-    return jsonify(thermoController.status_history)
+    return jsonify(thermoController.status_history[-3 * 60 * 24:])
 
 
 def _background_thread():
