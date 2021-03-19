@@ -119,7 +119,7 @@ class ThermoClient {
         if (numRecords < 2)
             return 0;
         const numRecentRecords = Math.min(30, numRecords);
-        let rightmostHeatOn; // distance from the rightmost sample
+        let rightmostHeatOn = undefined; // distance from the rightmost sample
         for (let i = 0; i < numRecentRecords; ++i) {
             if (this.stateRecords[numRecords - 1 - i].heater_is_on) {
                 rightmostHeatOn = i;
@@ -191,7 +191,7 @@ const thermoSketch = new p5(p => {
         }
         const visibleStateRecords = getVisibleStateRecords();
         const minOrMax = (reduce_fn, initial_value) => visibleStateRecords.reduce(reduce_fn, initial_value);
-        const createTempReduceFn = minMaxFn => (a, c) => {
+        const createTempReduceFn = (minMaxFn) => (a, c) => {
             const temps = [a, c.inside_temp];
             if (thermoClient.showingDesiredTemp)
                 temps.push(c.desired_temp);
@@ -203,7 +203,7 @@ const thermoSketch = new p5(p => {
         const temp_min = minOrMax(createTempReduceFn(Math.min), 50) - y_axis_margin_degrees;
         const temp_max = minOrMax(createTempReduceFn(Math.max), -50) + y_axis_margin_degrees;
         const chartYBase = 20;
-        const tempToY = temp => p.map(temp, temp_min, temp_max, chartYBase, p.height);
+        const tempToY = (temp) => p.map(temp, temp_min, temp_max, chartYBase, p.height);
         function drawVertGridLines() {
             const gridLow = Math.floor(temp_min);
             const gridHigh = Math.ceil(temp_max);
@@ -261,7 +261,7 @@ const thermoSketch = new p5(p => {
             p.point(x, tempToY(rec.inside_temp));
         }
     };
-    p.setStateRecords = records => stateRecords = records;
+    p.setStateRecords = (records) => stateRecords = records;
     p.getVisibleStateRecords = getVisibleStateRecords;
 });
 const thermoClient = new ThermoClient(thermoSketch);

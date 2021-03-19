@@ -1,4 +1,4 @@
-function slope(ys, xs) {
+function slope(ys: number[], xs: number[]) {
   const n = ys.length
   let sumX = 0
   let sumY = 0

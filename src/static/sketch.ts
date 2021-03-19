@@ -1,16 +1,16 @@
 ///<reference path="thermoClient.ts"/>
-declare const p5
+declare const p5: new (arg0: (p: any) => void) => any
 
 const thermoSketch = new p5(p => {
 
-  let stateRecords = []
+  let stateRecords: State[] = []
 
   p.setup = () => {
     const vis = <HTMLElement> document.querySelector('#visualization')
     p.createCanvas(vis.offsetWidth, vis.offsetHeight).parent('visualization')
   }
 
-  let timeToXFn
+  let timeToXFn: { (time: number): number }
 
   function getVisibleStateRecords() {
     // Find leftmost visible record, so we can draw from left to right
@@ -40,7 +40,7 @@ const thermoSketch = new p5(p => {
 
     let xRight = p.width - 20
 
-    function timeToX(time) {
+    function timeToX(time: number) {
       const secondsFromEnd = timeEnd - time
       const pixelsFromEnd = secondsFromEnd / thermoClient.sliceSecs
       return xRight - pixelsFromEnd
@@ -53,8 +53,8 @@ const thermoSketch = new p5(p => {
 
     const visibleStateRecords = getVisibleStateRecords()
 
-    const minOrMax = (reduce_fn, initial_value) => visibleStateRecords.reduce(reduce_fn, initial_value)
-    const createTempReduceFn = minMaxFn => (a, c) => {
+    const minOrMax = (reduce_fn: any, initial_value: number) => visibleStateRecords.reduce(reduce_fn, initial_value)
+    const createTempReduceFn = (minMaxFn: any) => (a: State, c: State) => {
       const temps = [a, c.inside_temp]
       if (thermoClient.showingDesiredTemp) temps.push(c.desired_temp)
       if (thermoClient.showingOutsideTemp) temps.push(c.outside_temp)
@@ -65,7 +65,7 @@ const thermoSketch = new p5(p => {
     const temp_max = minOrMax(createTempReduceFn(Math.max), -50) + y_axis_margin_degrees
     const chartYBase = 20
 
-    const tempToY = temp => p.map(temp, temp_min, temp_max, chartYBase, p.height)
+    const tempToY = (temp: number) => p.map(temp, temp_min, temp_max, chartYBase, p.height)
 
     function drawVertGridLines() {
       const gridLow = Math.floor(temp_min)
@@ -135,7 +135,7 @@ const thermoSketch = new p5(p => {
     }
   }
 
-  p.setStateRecords = records => stateRecords = records
+  p.setStateRecords = (records: State[]) => stateRecords = records
 
   p.getVisibleStateRecords = getVisibleStateRecords
 })

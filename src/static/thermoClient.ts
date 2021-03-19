@@ -19,6 +19,7 @@ interface State {
   inside_humidity:  number
   outside_humidity: number
   heater_is_on:     boolean
+  [key: string]:    any      // Allow setting the properties with [] notation
 }
 
 class ThermoClient {
@@ -26,21 +27,21 @@ class ThermoClient {
   public showingDesiredTemp = true
   public showingOutsideTemp = true
   private eventSource: EventSource
-  private stateRecords = [] // Shared with sketch.ts
+  private stateRecords: State[] = [] // Shared with sketch.ts
 
   constructor(private sketch: Sketch) {
     this.sliceSecs = 15
     this.inputElement('zoom').value = this.sliceSecs.toString()
     this.setUpEventProcessing()
     document.addEventListener("visibilitychange", () => this.visibilityChanged(!document.hidden), false)
-    document.querySelector('#show-desired-temp').addEventListener('change', (e) =>
+    document.querySelector('#show-desired-temp')!.addEventListener('change', (e) =>
       thermoClient.showDesiredTemp((<HTMLInputElement>e.target).checked))
-    document.querySelector('#show-outside-temp').addEventListener('change', (e) =>
+    document.querySelector('#show-outside-temp')!.addEventListener('change', (e) =>
       thermoClient.showOutsideTemp((<HTMLInputElement>e.target).checked))
   }
 
   private setUpEventProcessing() {
-    fetch('all-status').then(response => response.json()).then((stateRecords: [{}]) => {
+    fetch('all-status').then(response => response.json()).then((stateRecords: [State]) => {
       this.stateRecords = stateRecords
       this.sketch.setStateRecords(stateRecords)
 
@@ -58,7 +59,7 @@ class ThermoClient {
 
   private processEvent(state: State) {
     console.log('processEvent')
-    const set = (id: string, text: any) => document.getElementById(id).textContent = text
+    const set = (id: string, text: any) => document.getElementById(id)!.textContent = text
     const sset = (id: string, decimalPlaces: number) => set(id, state[id].toFixed(decimalPlaces))
 
     sset('outside_temp',     1)
@@ -80,20 +81,20 @@ class ThermoClient {
     set('pressure_change_slope', arrow(this.change_slope(state => state.pressure, 6 * 60), 2))
 
     const mwElem = document.getElementById('main_weather')
-    mwElem.innerHTML = ''
+    mwElem!.innerHTML = ''
     state.main_weather.forEach(mw => {
       const img = document.createElement('img')
       img.src = `http://openweathermap.org/img/wn/${mw.icon}.png`
       img.alt = img.title = mw.description
       img.classList.add('weather-img')
-      mwElem.appendChild(img)
+      mwElem!.appendChild(img)
     });
   }
 
   private calculateAndShowHeaterOnValues() {
     const visibleStateRecords = this.sketch.getVisibleStateRecords()
     const numVis = visibleStateRecords.length
-    const minutesDiff = (start, end) => (visibleStateRecords[end].time - visibleStateRecords[start].time) / 60
+    const minutesDiff = (start: number, end: number) => (visibleStateRecords[end].time - visibleStateRecords[start].time) / 60
     let onMinutes = 0
     let onPercent = 0
     if (numVis >= 2) {
@@ -104,8 +105,8 @@ class ThermoClient {
       const visibleMinutes = minutesDiff(0, numVis - 1)
       onPercent = onMinutes / visibleMinutes * 100
     }
-    document.getElementById("power_on_percent").textContent = onPercent.toFixed(1)
-    document.getElementById("power_on_minutes").textContent = onMinutes.toFixed(0)
+    document.getElementById("power_on_percent")!.textContent = onPercent.toFixed(1)
+    document.getElementById("power_on_minutes")!.textContent = onMinutes.toFixed(0)
   }
 
   adjustTemp(amount: number) {
@@ -149,7 +150,7 @@ class ThermoClient {
     this.calculateAndShowHeaterOnValues()
   }
 
-  private visibilityChanged(visible) {
+  private visibilityChanged(visible: boolean) {
     const rs = this.eventSource.readyState
     console.log(`vis changed to ${visible}. eventSource.readyState: ${rs}`)
     if (visible && rs === 2 /* closed */) {
@@ -166,7 +167,7 @@ class ThermoClient {
     if (numRecords < 2) return 0
 
     const numRecentRecords = Math.min(30, numRecords)
-    let rightmostHeatOn: number // distance from the rightmost sample
+    let rightmostHeatOn: number | undefined = undefined // distance from the rightmost sample
     for (let i = 0; i < numRecentRecords; ++i) {
       if (this.stateRecords[numRecords - 1 - i].heater_is_on) {
         rightmostHeatOn = i
@@ -180,7 +181,7 @@ class ThermoClient {
     return this.change_slope(state => state.inside_temp, numRequested)
   }
 
-  private change_slope(fieldFromState: (state) => number, numRecordsInSlope: number): number {
+  private change_slope(fieldFromState: (state: State) => number, numRecordsInSlope: number): number {
     const numRecords = this.stateRecords.length
     const numRecentRecords = Math.min(numRecordsInSlope, numRecords)
     if (numRecentRecords < 2) return 0
