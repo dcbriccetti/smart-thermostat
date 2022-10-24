@@ -1,4 +1,4 @@
-from typing import NamedTuple, List, Iterable, Tuple, Any
+from typing import NamedTuple, List
 from datetime import datetime, timedelta
 from thermocontroller import ThermoController
 
