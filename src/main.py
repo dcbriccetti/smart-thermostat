@@ -47,7 +47,7 @@ class Observation(db.Model):
 db.create_all()
 
 t = time()
-observations = Observation.query.order_by(Observation.time).all()
+observations = Observation.query.all()
 print(f'Past observations fetched from database in {(time() - t) * 1000:.3f} ms')
 
 thermoController = ThermoController(WEATHER_QUERY, Sensor(), observations,
